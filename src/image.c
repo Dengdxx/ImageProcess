@@ -640,8 +640,7 @@ growth_array arr = {
     .outer = {1,1,1,1,1,1},
 	.up_inner={4,4,4,4,4,4},
     .inner = {5,5,5,5,5,5},       
-    .up_outerdownarc = {4,4,1,1,2,3,3,3}, 
-    .outer_uparc = {2,3,3,3,3,3,3,4} 
+    .corner = {4,4,3,2,1,1,1}
 };
 
 /** 
@@ -718,8 +717,7 @@ float calculate_border_variance(uint8_t begin, uint8_t end, uint8_t *border)
 十字补线函数
  */
 uint8_t cross_flag=0;
-void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, uint16_t total_num_l, uint16_t total_num_r,
-										 uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
+void cross_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
 	int temp1=0,temp2=0;
 	cross_flag=0;
@@ -761,6 +759,7 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 	}
 	//上面的检察全过才能到这里 所以直接赋1 补线流程集成在一块 flag主要是为了日志记录
 	cross_flag=1;
+	/*补线
 	log_add_int16("temp1", temp1, -1);
 	log_add_int16("temp2", temp2, -1);
 	uint8_t templ=l_border[temp1+3],tempr=r_border[temp2+3];
@@ -769,9 +768,11 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 		//补竖线得了
 		l_border[i]=templ;
 		r_border[i]=tempr;
-	}
+	}*/
 	
 }
+
+
 
 //直线检测函数
 uint8_t left_straight=0,right_straight=0,straight=0;
@@ -781,18 +782,37 @@ void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,ui
 	right_straight=0;
 	left_straight=0;
 	straight=0;
-	float left_variance = calculate_border_variance(start_l, height-2, l);//减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
-	float right_variance = calculate_border_variance(start_r, height-2, r);
+	float left_variance = calculate_border_variance(start_l, height-5, l);//至少要减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
+	float right_variance = calculate_border_variance(start_r, height-5, r);
 
-	left_straight = (left_variance < 10.0f);
-	right_straight = (right_variance < 10.0f);
+	// 这里留了一个不那么严格的直线判断标准 值为2
+	left_straight = (left_variance < 10.0f)?1:(left_variance < 40.0f?2:0);
+	right_straight = (right_variance < 10.0f)?1:(right_variance < 40.0f?2:0);
 	straight = left_straight && right_straight;
 
 	log_add_float("left_straight", left_straight, -1);
 	log_add_float("right_straight", right_straight, -1);
 }
 
-
+//环岛检测函数
+uint8_t island_flag=0;
+void island_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
+{
+	island_flag=0;
+	match_result result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner, 7, 2, 0);
+	match_result result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner, 7, 2, 0);
+	if((left_straight!=0)&&result_cr.matched)
+	{
+		island_flag=1;
+		// 右环
+	}
+	else if((right_straight!=0)&&result_cl.matched)
+	{
+		island_flag=2;
+		// 左环
+	}
+	log_add_uint8("island_flag", island_flag, -1);
+}
 
 
 
@@ -843,10 +863,10 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
 	get_left(data_stastics_l);
 	get_right(data_stastics_r);
 	//处理函数放这里 不要放到if外面
-    cross_fill(imo, l_border, r_border, data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字补线
-
+    cross_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字检测
+	straight_detect(l_border, r_border, last_left_lost, last_right_lost, image_h);//直线检测
+	island_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);
 }
-	straight_detect(l_border, r_border, last_left_lost, last_right_lost, image_h);
     //求中线
 	for (i = Hightest; i < image_h; i++)
 	{

@@ -18,8 +18,7 @@ typedef struct{
     uint16_t outer[6];
     uint16_t up_inner[6];
     uint16_t inner[6];
-    uint16_t up_outerdownarc[8];
-    uint16_t outer_uparc[8];
+    uint16_t corner[7];
 }growth_array;
 
 
