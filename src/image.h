@@ -14,10 +14,10 @@ typedef struct {
 
 //生长方向序列结构体
 typedef struct{
-    uint16_t outer_up[6];
-    uint16_t inner_up[6];
-    uint16_t up_outer[6];
+    uint16_t up[6];
+    uint16_t outer[6];
     uint16_t up_inner[6];
+    uint16_t inner[6];
     uint16_t up_outerdownarc[8];
     uint16_t outer_uparc[8];
 }growth_array;

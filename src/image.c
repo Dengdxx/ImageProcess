@@ -379,9 +379,13 @@ uint8_t r_border[image_h];//右线数组
 uint8_t center_line[image_h];//中线数组
 uint8_t left_lost[image_h];//左线丢失标志数组
 uint8_t right_lost[image_h];//右线丢失标志数组
+uint8_t last_left_lost=0;//记录最后一次左线丢失的位置 注意1这是由于局限的 丢线丢在上方就寄了 我这里主要是为了后续直线判断
+uint8_t last_right_lost=0;//记录最后一次右线丢失的位置  注意2这是索引 实际丢线行数值要再+1
 void get_left(uint16_t total_L)
 {
 	uint16_t j;
+	static uint8_t temp_lll=0;//存储上次丢线行数 超过3行不丢就不再更新最后一次丢线位置
+	temp_lll=0;
 	//初始化左边界为最小值（丢线状态）
 	for (j = 0; j < image_h; j++)
 	{
@@ -402,8 +406,12 @@ void get_left(uint16_t total_L)
 				l_border[row] = col;
 				left_lost[row] = 0;
 			}
-			else{//这里也没必要写
+			else{
 				left_lost[row] = 1;  // 丢线标志
+				if(row-temp_lll<=3)//超过3行不丢就不再更新最后一次丢线位置
+				{
+				    temp_lll=row;
+				    last_left_lost=row;}
 			}
 		}
 	}
@@ -421,6 +429,8 @@ example：get_right(data_stastics_r);
 void get_right(uint16_t total_R)
 {
 	uint16_t j;
+	static uint8_t temp_rrr=0;//存储上次丢线行数 超过3行不丢就不再更新最后一次丢线位置
+	temp_rrr=0;
 	//初始化右边界为最大值（丢线状态）
 	for (j = 0; j < image_h; j++)
 	{
@@ -443,6 +453,10 @@ void get_right(uint16_t total_R)
 			}
 			else{
 				right_lost[row] = 1;  // 丢线标志
+				if(row-temp_rrr<=3)//超过3行不丢就不再更新最后一次丢线位置
+				{
+				    temp_rrr=row;
+				    last_right_lost=row;}
 			}
 		}
 	}
@@ -527,15 +541,18 @@ void draw_edge()
  * @param pattern      目标模式序列
  * @param pattern_len  模式长度 (必须 > 0)
  * @param max_gap      允许的最大单段间隔 (应 >= 0)
+ * @param start_pos    可选：从输入序列的第几个位置开始匹配，默认传0从头开始
  *
  * @return match_result_t 结构体, 包含匹配状态和置信度
+ * @note result.end 返回的是匹配结束位置在整个input数组中的索引（不是相对于start_pos）
  */
 match_result match_strict_sequence_with_gaps(
     const uint16_t* input,     // 输入序列
     size_t         input_len,
     const uint16_t* pattern,    //目标模式序列
     size_t         pattern_len,
-    uint16_t        max_gap       // 允许的最大单段间隔
+    uint16_t        max_gap,      // 允许的最大单段间隔
+    size_t         start_pos      // 起始匹配位置（新增参数）
 ) {
     // 默认结果
     match_result result = {0, 0, 0, 0.0f}; 
@@ -544,12 +561,17 @@ match_result match_strict_sequence_with_gaps(
     if (!input || !pattern || pattern_len == 0 || input_len == 0 || max_gap < 0) {
         return result;
     }
+    
+    // 检查起始位置是否有效
+    if (start_pos >= input_len) {
+        return result;
+    }
 
     size_t  pat_idx = 0;           // 模式索引 (使用 size_t)
     uint16_t current_gap = 0;     // 标准化
     uint16_t total_gap = 0;         // 标准化
 
-    for (size_t i = 0; i < input_len; i++) {
+    for (size_t i = start_pos; i < input_len; i++) {
         
         // 2. 提前退出剪枝
         if (input_len - i < pattern_len - pat_idx) {
@@ -612,205 +634,149 @@ match_result match_strict_sequence_with_gaps(
 //  注意：这些序列值是dir_l/dir_r的记录值，不是实际生长方向 但是后续判断就用这个
 // 实际生长方向 = seeds[(记录值+1) & 7]
 growth_array arr = {
-    .outer_up = {1,1,1,3,3,3},       
-    .inner_up = {5,5,5,4,4,4},       
-    .up_outer = {4,4,4,1,1,1},       
-    .up_inner = {3,3,3,5,5,5},       
+    .up = {3,3,3,3,3,3},           
+    .outer = {1,1,1,1,1,1},
+	.up_inner={4,4,4,4,4,4},
+    .inner = {5,5,5,5,5,5},       
     .up_outerdownarc = {4,4,1,1,2,3,3,3}, 
     .outer_uparc = {2,3,3,3,3,3,3,4} 
 };
 
 /** 
-* @brief 最小二乘法
-* @param uint8 begin				输入起点
-* @param uint8 end					输入终点
-* @param uint8 *border				输入需要计算斜率的边界首地址
-*  @see CTest		Slope_Calculate(start, end, border);//斜率
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
+* @brief 计算边界拟合方差（最小二乘法）
+* @param begin					输入起点
+* @param end					输入终点
+* @param border				输入需要计算的边界数组首地址
+*  @see CTest		float variance = calculate_border_variance(start, end, border);
+* @return 返回拟合方差值，值越小说明边界越接近直线
+*     -<em>-1.0f</em> 计算失败（参数错误或数据点不足）
+*     -<em>>=0</em> 拟合方差值
+* @note 方差表示边界点与拟合直线的平均偏离程度，可用于判断直线质量
 */
-float Slope_Calculate(uint8_t begin, uint8_t end, uint8_t *border)
+float calculate_border_variance(uint8_t begin, uint8_t end, uint8_t *border)
 {
 	float xsum = 0, ysum = 0, xysum = 0, x2sum = 0;
-	int16_t i = 0;
-	float result = 0;
-	static float resultlast=0.0f;
-
+	uint16_t i;
+	uint16_t num = 0;
+	float x_average, y_average;
+	float slope, intercept;
+	static float slope_last = 0.0f;
+	
+	// 参数检查
+	if (end <= begin || border == NULL) {
+		return -1.0f;
+	}
+	
+	// 累加计算
 	for (i = begin; i < end; i++)
 	{
 		xsum += i;
 		ysum += border[i];
-		xysum += i * (border[i]);
+		xysum += i * border[i];
 		x2sum += i * i;
-
-	}
-	if ((end - begin)*x2sum - xsum * xsum) //判断除数是否为零
-	{
-		result = ((end - begin)*xysum - xsum * ysum) / ((end - begin)*x2sum - xsum * xsum);
-		resultlast = result;
-	}
-	else
-	{
-		result = resultlast;
-	}
-	return result;
-}
-
-/** 
-* @brief 计算斜率截距
-* @param uint8 start				输入起点
-* @param uint8 end					输入终点
-* @param uint8 *border				输入需要计算斜率的边界
-* @param float *slope_rate			输入斜率地址
-* @param float *intercept			输入截距地址
-*  @see CTest		calculate_s_i(start, end, r_border, &slope_l_rate, &intercept_l);
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
-*/
-void calculate_s_i(uint8_t start, uint8_t end, uint8_t *border, float *slope_rate, float *intercept)
-{
-	uint16_t i, num = 0;
-	uint16_t xsum = 0, ysum = 0;
-	float y_average, x_average;
-
-	num = 0;
-	xsum = 0;
-	ysum = 0;
-	y_average = 0;
-	x_average = 0;
-	for (i = start; i < end; i++)
-	{
-		xsum += i;
-		ysum += border[i];
 		num++;
 	}
-
-	//计算各个平均数
-	if (num)
-	{
-		x_average = (float)xsum / (float)num;
-		y_average = (float)ysum / (float)num;
-
+	
+	// 检查数据点数量
+	if (num == 0) {
+		return -1.0f;
 	}
-
-	/*计算斜率*/
-	*slope_rate = Slope_Calculate(start, end, border);//斜率
-	*intercept = y_average - (*slope_rate)*x_average;//截距
+	
+	// 计算平均值
+	x_average = xsum / num;
+	y_average = ysum / num;
+	
+	// 计算斜率（最小二乘法）
+	float denominator = num * x2sum - xsum * xsum;
+	if (denominator != 0) {
+		slope = (num * xysum - xsum * ysum) / denominator;
+		slope_last = slope;
+	} else {
+		// 除数为零时使用上次结果
+		slope = slope_last;
+	}
+	
+	// 计算截距
+	intercept = y_average - slope * x_average;
+	
+	// 计算方差（拟合残差的平方和除以样本数）
+	float variance = 0;
+	for (i = begin; i < end; i++)
+	{
+		float fitted_y = slope * i + intercept;
+		float residual = border[i] - fitted_y;
+		variance += residual * residual;
+	}
+	variance /= num;
+	
+	return variance;
 }
 
 /** 
-* @brief 十字补线函数
-* @param uint8(*image)[image_w]		输入二值图像
-* @param uint8 *l_border			输入左边界首地址
-* @param uint8 *r_border			输入右边界首地址
-* @param uint16 total_num_l			输入左边循环总次数
-* @param uint16 total_num_r			输入右边循环总次数
-* @param uint16 *dir_l				输入左边生长方向首地址
-* @param uint16 *dir_r				输入右边生长方向首地址
-* @param uint16(*points_l)[2]		输入左边轮廓首地址
-* @param uint16(*points_r)[2]		输入右边轮廓首地址
-*  @see CTest		cross_fill(image,l_border, r_border, data_statics_l, data_statics_r, dir_l, dir_r, points_l, points_r);
-* @return 返回说明
-*     -<em>false</em> fail
-*     -<em>true</em> succeed
+十字补线函数
  */
+uint8_t cross_flag=0;
 void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, uint16_t total_num_l, uint16_t total_num_r,
 										 uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
-	uint16_t i;
-	uint8_t break_num_l = 0;
-	uint8_t break_num_r = 0;
-	uint8_t start, end;
-	float slope_l_rate = 0, intercept_l = 0;
-	
+	int temp1=0,temp2=0;
+	cross_flag=0;
 	// 左边匹配检测
-	match_result result_l = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up_inner, 6, 3);
-	if (result_l.matched)
-	{
-		break_num_l = result_l.end; // 使用匹配结束位置
-		break_num_l = points_l[break_num_l][1]; // 转换为y坐标
-	}
-	
-	// 右边匹配检测
-	match_result result_r = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up_inner, 6, 3);
-	if (result_r.matched)
-	{
-		break_num_r = result_r.end; // 使用匹配结束位置
-		break_num_r = points_r[break_num_r][1]; // 转换为y坐标
-	}
-
-	if (result_l.matched && result_r.matched) // 两边生长方向都符合条件
-	{
-		for(i=0;(i<break_num_l)||(i<break_num_r);i++)
-		{
-			// 左边补线
-			if(i<break_num_l)
-			{
-				l_border[i] = l_border[break_num_l+5];
-			}
-			// 右边补线
-			if(i<break_num_r)
-			{
-				r_border[i] = r_border[break_num_r+5];
+	match_result result_l1 = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up, 6, 2, 0);
+	if(result_l1.matched){
+		match_result result_l2 =match_strict_sequence_with_gaps(dir_l, total_num_l, arr.inner, 6, 2, result_l1.end);
+		if(result_l2.matched){
+			match_result result_l3 = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up_inner, 6, 2, result_l2.end);
+			if(!result_l3.matched){ 
+				return;
 			}
 		}
-
-
-
+		else{
+			return;
+		}
 	}
-
+	else{
+		return;
+	}
+	match_result result_r1 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up, 6, 3, 0);
+	if(result_r1.matched){
+		match_result result_r2 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.inner, 6, 3, result_r1.end);
+		if(result_r2.matched){
+			match_result result_r3 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up_inner, 6, 3, result_r2.end);
+			if(!result_r3.matched){ 
+				return;
+			}
+		}
+		else{
+			return;
+		}
+	}
+	else{
+		return;
+	}
+	cross_flag=1;
 }
 
 //直线检测函数
-uint16_t straight_pattern[75] = { [0 ... 74] = 4 };
 uint8_t left_straight=0,right_straight=0,straight=0;
-void straight_detect(uint16_t *dir_l, uint16_t *dir_r, uint16_t height)
+void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,uint16_t height)
 {
 	// 先清零
 	right_straight=0;
 	left_straight=0;
-	uint8_t left4_count=0;
-	uint8_t right4_count=0;
-	uint8_t left3_count=0;
-	uint8_t right3_count=0;
-	// 决策树：一行4（斜向上）点大于105一定是直线 如果小于105但大于75且3（直上）点大于25也认为是直线
-	for(int i=0;i<height;i++){
-		if(dir_l[i]==4)
-		{
-			left4_count++;
-		}
-		if(dir_r[i]==4)
-		{
-			right4_count++;
-		}
-		if(dir_l[i]==3)
-		{
-			left3_count++;
-		}
-		if(dir_r[i]==3)
-		{
-			right3_count++;
-		}
-	log_add_uint8("left4_count", left4_count, -1);
-	log_add_uint8("right4_count", right4_count, -1);
-	log_add_uint8("left3_count", left3_count, -1);
-	log_add_uint8("right3_count", right3_count, -1);
-	}
+	straight=0;
+	float left_variance = calculate_border_variance(start_l, height-2, l);//减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
+	float right_variance = calculate_border_variance(start_r, height-2, r);
 
-	if((left4_count>=60)&&(left3_count)>=35)
-	{
-		left_straight=1;
-	}
+	left_straight = (left_variance < 10.0f);
+	right_straight = (right_variance < 10.0f);
+	straight = left_straight && right_straight;
 
-	if((right4_count>=60)&&(right3_count)>=35)
-	{
-		right_straight=1;
-	}
-	straight=left_straight&&right_straight;
-
+	log_add_float("left_straight", left_straight, -1);
+	log_add_float("right_straight", right_straight, -1);
 }
+
+
 
 
 
@@ -824,10 +790,11 @@ void userlog()
 	log_add_uint16_array("dir_r", dir_r, data_stastics_r,-1);
 	log_add_uint8_array("right_lost", right_lost, image_h,-1);
 	log_add_uint8_array("left_lost", left_lost, image_h,-1);
-	log_add_uint8_array("l_border", l_border, image_h,-1);
-	log_add_uint8_array("r_border", r_border, image_h,-1);
+	//log_add_uint8_array("l_border", l_border, image_h,-1);
+	//log_add_uint8_array("r_border", r_border, image_h,-1);
 	log_add_uint8("left_straight", left_straight, -1);
 	log_add_uint8("right_straight", right_straight, -1);
+	log_add_uint8("cross_flag", cross_flag, -1);
 }
 
 
@@ -861,8 +828,9 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
 	get_right(data_stastics_r);
 	//处理函数放这里 不要放到if外面
     cross_fill(imo, l_border, r_border, data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字补线
-	straight_detect(dir_l, dir_r, image_h);
+
 }
+	straight_detect(l_border, r_border, last_left_lost, last_right_lost, image_h);
     //求中线
 	for (i = Hightest; i < image_h; i++)
 	{
