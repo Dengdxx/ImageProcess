@@ -558,7 +558,7 @@ match_result match_strict_sequence_with_gaps(
     match_result result = {0, 0, 0, 0.0f}; 
     
     // 1. 鲁棒性检查
-    if (!input || !pattern || pattern_len == 0 || input_len == 0 || max_gap < 0) {
+    if (!input || !pattern || pattern_len == 0 || input_len == 0) {
         return result;
     }
     
@@ -566,6 +566,8 @@ match_result match_strict_sequence_with_gaps(
     if (start_pos >= input_len) {
         return result;
     }
+    
+    // max_gap 允许为 0（表示严格连续匹配），所以不检查 < 0（uint16_t 本身也无法 < 0）
 
     size_t  pat_idx = 0;           // 模式索引 (使用 size_t)
     uint16_t current_gap = 0;     // 标准化
@@ -722,10 +724,11 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 	int temp1=0,temp2=0;
 	cross_flag=0;
 	// 左边匹配检测
-	match_result result_l1 = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up, 6, 2, 0);
+	match_result result_l1 = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up, 6, 0, 0);
 	if(result_l1.matched){
-		match_result result_l2 =match_strict_sequence_with_gaps(dir_l, total_num_l, arr.inner, 6, 2, result_l1.end);
+		match_result result_l2 =match_strict_sequence_with_gaps(dir_l, total_num_l, arr.inner, 6, 0, result_l1.end);
 		if(result_l2.matched){
+			temp1=image_h-1-points_l[result_l2.end][1];//这段是cross上边缘 记录行数
 			match_result result_l3 = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.up_inner, 6, 2, result_l2.end);
 			if(!result_l3.matched){ 
 				return;
@@ -738,14 +741,16 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 	else{
 		return;
 	}
-	match_result result_r1 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up, 6, 3, 0);
+	match_result result_r1 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up, 6, 0, 0);
 	if(result_r1.matched){
-		match_result result_r2 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.inner, 6, 3, result_r1.end);
+		match_result result_r2 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.inner, 6, 0, result_r1.end);
 		if(result_r2.matched){
-			match_result result_r3 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up_inner, 6, 3, result_r2.end);
+			temp2=image_h-1-points_r[result_r2.end][1];//这段是cross上边缘 记录行数
+			match_result result_r3 = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.up_inner, 6, 2, result_r2.end);
 			if(!result_r3.matched){ 
 				return;
 			}
+
 		}
 		else{
 			return;
@@ -754,7 +759,18 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 	else{
 		return;
 	}
+	//上面的检察全过才能到这里 所以直接赋1 补线流程集成在一块 flag主要是为了日志记录
 	cross_flag=1;
+	log_add_int16("temp1", temp1, -1);
+	log_add_int16("temp2", temp2, -1);
+	uint8_t templ=l_border[temp1+3],tempr=r_border[temp2+3];
+	for(uint8_t i=0;(i<=temp1)||(i<=temp2);i++)
+	{
+		//补竖线得了
+		l_border[i]=templ;
+		r_border[i]=tempr;
+	}
+	
 }
 
 //直线检测函数
