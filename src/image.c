@@ -435,10 +435,7 @@ void get_right(uint16_t total_R)
 		uint16_t col = points_r[j][0];
 		if (row < image_h) // 确保行号在范围内
 		{
-			// 找到该行的任何有效点，都清除丢线标志
-			right_lost[row] = 0;
-			
-			// 找到真实边界点：取该行最左边的右边界点
+			// 取该行最左边的右边界点
 			if (col < r_border[row])
 			{
 				r_border[row] = col;
@@ -766,6 +763,58 @@ void cross_fill(uint8_t(*image)[image_w], uint8_t *l_border, uint8_t *r_border, 
 
 }
 
+//直线检测函数
+uint16_t straight_pattern[75] = { [0 ... 74] = 4 };
+uint8_t left_straight=0,right_straight=0,straight=0;
+void straight_detect(uint16_t *dir_l, uint16_t *dir_r, uint16_t height)
+{
+	// 先清零
+	right_straight=0;
+	left_straight=0;
+	uint8_t left4_count=0;
+	uint8_t right4_count=0;
+	uint8_t left3_count=0;
+	uint8_t right3_count=0;
+	// 决策树：一行4（斜向上）点大于105一定是直线 如果小于105但大于75且3（直上）点大于25也认为是直线
+	for(int i=0;i<height;i++){
+		if(dir_l[i]==4)
+		{
+			left4_count++;
+		}
+		if(dir_r[i]==4)
+		{
+			right4_count++;
+		}
+		if(dir_l[i]==3)
+		{
+			left3_count++;
+		}
+		if(dir_r[i]==3)
+		{
+			right3_count++;
+		}
+	log_add_uint8("left4_count", left4_count, -1);
+	log_add_uint8("right4_count", right4_count, -1);
+	log_add_uint8("left3_count", left3_count, -1);
+	log_add_uint8("right3_count", right3_count, -1);
+	}
+
+	if((left4_count>=60)&&(left3_count)>=35)
+	{
+		left_straight=1;
+	}
+
+	if((right4_count>=60)&&(right3_count)>=35)
+	{
+		right_straight=1;
+	}
+	straight=left_straight&&right_straight;
+
+}
+
+
+
+
 /*
 日志记录函数 日志统一写在这里
 */
@@ -777,7 +826,8 @@ void userlog()
 	log_add_uint8_array("left_lost", left_lost, image_h,-1);
 	log_add_uint8_array("l_border", l_border, image_h,-1);
 	log_add_uint8_array("r_border", r_border, image_h,-1);
-
+	log_add_uint8("left_straight", left_straight, -1);
+	log_add_uint8("right_straight", right_straight, -1);
 }
 
 
@@ -811,6 +861,7 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
 	get_right(data_stastics_r);
 	//处理函数放这里 不要放到if外面
     cross_fill(imo, l_border, r_border, data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字补线
+	straight_detect(dir_l, dir_r, image_h);
 }
     //求中线
 	for (i = Hightest; i < image_h; i++)
