@@ -88,7 +88,7 @@ uint8_t get_start_point(uint8_t start_row)
 	start_point_r[1] = 0;//y
 
 		//从中间往左边，先找起点
-	for (i = image_w / 2; i > border_min; i--)
+	for (i = image_w / 2; i >= border_min; i--)
 	{
 		start_point_l[0] = i;//x
 		start_point_l[1] = start_row;//y
@@ -100,7 +100,7 @@ uint8_t get_start_point(uint8_t start_row)
 		}
 	}
 
-	for (i = image_w / 2; i < border_max; i++)
+	for (i = image_w / 2; i <= border_max; i++)
 	{
 		start_point_r[0] = i;//x
 		start_point_r[1] = start_row;//y
@@ -394,13 +394,16 @@ void get_left(uint16_t total_L)
 	{
 		uint16_t row = image_h - 1 - points_l[j][1]; // 反转行号
 		uint16_t col = points_l[j][0];
-		if (row < image_h) // 确保行号在范围内
-		{
-			// 找到真实边界点：取该行最右边的左边界点
+		if (row < image_h) // 确保行号在范围内 其实没必要
+		{	
+			// 取该行最右边的左边界点
 			if (col > l_border[row])
 			{
 				l_border[row] = col;
-				left_lost[row] = 0;  // 找到边界，清除丢线标志
+				left_lost[row] = 0;
+			}
+			else{//这里也没必要写
+				left_lost[row] = 1;  // 丢线标志
 			}
 		}
 	}
@@ -432,11 +435,17 @@ void get_right(uint16_t total_R)
 		uint16_t col = points_r[j][0];
 		if (row < image_h) // 确保行号在范围内
 		{
+			// 找到该行的任何有效点，都清除丢线标志
+			right_lost[row] = 0;
+			
 			// 找到真实边界点：取该行最左边的右边界点
 			if (col < r_border[row])
 			{
 				r_border[row] = col;
-				right_lost[row] = 0;  // 找到边界，清除丢线标志
+				right_lost[row] = 0;
+			}
+			else{
+				right_lost[row] = 1;  // 丢线标志
 			}
 		}
 	}
@@ -444,7 +453,7 @@ void get_right(uint16_t total_R)
 
 /*
 函数名称：void image_draw_rectan(uint8(*image)[image_w])
-功能说明：给图像画一个黑框
+功能说明：给图像画一个黑框（1像素宽）
 参数说明：uint8(*image)[image_w]	图像首地址
 函数返回：无
 修改时间：2022年9月8日
@@ -453,22 +462,19 @@ example： image_draw_rectan(bin_image);
  */
 void image_draw_rectan(uint8_t(*image)[image_w])
 {
-
 	uint8_t i = 0;
+	
+	// 左右边框：各1列
 	for (i = 0; i < image_h; i++)
 	{
-		image[i][0] = 0;
-		image[i][1] = 0;
-		image[i][image_w - 1] = 0;
-		image[i][image_w - 2] = 0;
-
+		image[i][0] = 0;           // 最左边
+		image[i][image_w - 1] = 0; // 最右边
 	}
+	
+	// 上边框：1行
 	for (i = 0; i < image_w; i++)
 	{
-		image[0][i] = 0;
-		image[1][i] = 0;
-		//image[image_h-1][i] = 0;
-
+		image[0][i] = 0; // 最上面
 	}
 }
 
@@ -767,6 +773,11 @@ void userlog()
 {
 	log_add_uint16_array("dir_l", dir_l, data_stastics_l,-1);
 	log_add_uint16_array("dir_r", dir_r, data_stastics_r,-1);
+	log_add_uint8_array("right_lost", right_lost, image_h,-1);
+	log_add_uint8_array("left_lost", left_lost, image_h,-1);
+	log_add_uint8_array("l_border", l_border, image_h,-1);
+	log_add_uint8_array("r_border", r_border, image_h,-1);
+
 }
 
 
@@ -786,7 +797,7 @@ void image_process(void)
 
 //滤波（形态学处理）
 morph_clean_u8_binary_adapter(Grayscale[0], image_w, image_h, imo[0]);
-image_draw_rectan(imo);//填黑框
+//image_draw_rectan(imo);//填黑框
 //清零
 data_stastics_l = 0;
 data_stastics_r = 0;
