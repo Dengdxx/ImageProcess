@@ -797,7 +797,7 @@ void image_process(void)
 
 //滤波（形态学处理）
 morph_clean_u8_binary_adapter(Grayscale[0], image_w, image_h, imo[0]);
-//image_draw_rectan(imo);//填黑框
+image_draw_rectan(imo);//填黑框
 //清零
 data_stastics_l = 0;
 data_stastics_r = 0;
@@ -813,7 +813,7 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
     cross_fill(imo, l_border, r_border, data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字补线
 }
     //求中线
-	for (i = Hightest; i < image_h-1; i++)
+	for (i = Hightest; i < image_h; i++)
 	{
 		center_line[i] = (l_border[i] + r_border[i]) >> 1;//求中线
 	}
