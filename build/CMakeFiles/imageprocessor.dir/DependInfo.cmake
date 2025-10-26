@@ -8,13 +8,13 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/28693/Desktop/ImageProcess/src/global_image_buffer.c" "CMakeFiles/imageprocessor.dir/src/global_image_buffer.c.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/global_image_buffer.c.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/processor.c" "CMakeFiles/imageprocessor.dir/src/processor.c.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/processor.c.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/csv_reader.cpp" "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/dynamic_log.cpp" "CMakeFiles/imageprocessor.dir/src/dynamic_log.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/dynamic_log.cpp.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/main.cpp" "CMakeFiles/imageprocessor.dir/src/main.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/main.cpp.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/oscilloscope.cpp" "CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/utils.cpp" "CMakeFiles/imageprocessor.dir/src/utils.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/utils.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/global_image_buffer.c" "CMakeFiles/imageprocessor.dir/src/global_image_buffer.c.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/global_image_buffer.c.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.c" "CMakeFiles/imageprocessor.dir/src/processor.c.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/processor.c.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/csv_reader.cpp" "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/dynamic_log.cpp" "CMakeFiles/imageprocessor.dir/src/dynamic_log.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/dynamic_log.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/main.cpp" "CMakeFiles/imageprocessor.dir/src/main.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/main.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/oscilloscope.cpp" "CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/utils.cpp" "CMakeFiles/imageprocessor.dir/src/utils.cpp.obj" "gcc" "CMakeFiles/imageprocessor.dir/src/utils.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

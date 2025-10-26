@@ -52,10 +52,10 @@ RM = "C:\Program Files\CMake\bin\cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\28693\Desktop\ImageProcess
+CMAKE_SOURCE_DIR = C:\Users\28693\Desktop\SMARTCAR\ImageProcess
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\28693\Desktop\ImageProcess\build
+CMAKE_BINARY_DIR = C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/video_processor.dir/depend.make
@@ -73,63 +73,63 @@ CMakeFiles/video_processor.dir/codegen:
 
 CMakeFiles/video_processor.dir/src/video_processor.cpp.obj: CMakeFiles/video_processor.dir/flags.make
 CMakeFiles/video_processor.dir/src/video_processor.cpp.obj: CMakeFiles/video_processor.dir/includes_CXX.rsp
-CMakeFiles/video_processor.dir/src/video_processor.cpp.obj: C:/Users/28693/Desktop/ImageProcess/src/video_processor.cpp
+CMakeFiles/video_processor.dir/src/video_processor.cpp.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/video_processor.cpp
 CMakeFiles/video_processor.dir/src/video_processor.cpp.obj: CMakeFiles/video_processor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/video_processor.dir/src/video_processor.cpp.obj"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/video_processor.cpp.obj -MF CMakeFiles\video_processor.dir\src\video_processor.cpp.obj.d -o CMakeFiles\video_processor.dir\src\video_processor.cpp.obj -c C:\Users\28693\Desktop\ImageProcess\src\video_processor.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/video_processor.dir/src/video_processor.cpp.obj"
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/video_processor.cpp.obj -MF CMakeFiles\video_processor.dir\src\video_processor.cpp.obj.d -o CMakeFiles\video_processor.dir\src\video_processor.cpp.obj -c C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\video_processor.cpp
 
 CMakeFiles/video_processor.dir/src/video_processor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/video_processor.dir/src/video_processor.cpp.i"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\28693\Desktop\ImageProcess\src\video_processor.cpp > CMakeFiles\video_processor.dir\src\video_processor.cpp.i
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\video_processor.cpp > CMakeFiles\video_processor.dir\src\video_processor.cpp.i
 
 CMakeFiles/video_processor.dir/src/video_processor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/video_processor.dir/src/video_processor.cpp.s"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\28693\Desktop\ImageProcess\src\video_processor.cpp -o CMakeFiles\video_processor.dir\src\video_processor.cpp.s
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\video_processor.cpp -o CMakeFiles\video_processor.dir\src\video_processor.cpp.s
 
 CMakeFiles/video_processor.dir/src/utils.cpp.obj: CMakeFiles/video_processor.dir/flags.make
 CMakeFiles/video_processor.dir/src/utils.cpp.obj: CMakeFiles/video_processor.dir/includes_CXX.rsp
-CMakeFiles/video_processor.dir/src/utils.cpp.obj: C:/Users/28693/Desktop/ImageProcess/src/utils.cpp
+CMakeFiles/video_processor.dir/src/utils.cpp.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/utils.cpp
 CMakeFiles/video_processor.dir/src/utils.cpp.obj: CMakeFiles/video_processor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/video_processor.dir/src/utils.cpp.obj"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/utils.cpp.obj -MF CMakeFiles\video_processor.dir\src\utils.cpp.obj.d -o CMakeFiles\video_processor.dir\src\utils.cpp.obj -c C:\Users\28693\Desktop\ImageProcess\src\utils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/video_processor.dir/src/utils.cpp.obj"
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/utils.cpp.obj -MF CMakeFiles\video_processor.dir\src\utils.cpp.obj.d -o CMakeFiles\video_processor.dir\src\utils.cpp.obj -c C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\utils.cpp
 
 CMakeFiles/video_processor.dir/src/utils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/video_processor.dir/src/utils.cpp.i"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\28693\Desktop\ImageProcess\src\utils.cpp > CMakeFiles\video_processor.dir\src\utils.cpp.i
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\utils.cpp > CMakeFiles\video_processor.dir\src\utils.cpp.i
 
 CMakeFiles/video_processor.dir/src/utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/video_processor.dir/src/utils.cpp.s"
-	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\28693\Desktop\ImageProcess\src\utils.cpp -o CMakeFiles\video_processor.dir\src\utils.cpp.s
+	C:\msys64\mingw64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\utils.cpp -o CMakeFiles\video_processor.dir\src\utils.cpp.s
 
 CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj: CMakeFiles/video_processor.dir/flags.make
 CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj: CMakeFiles/video_processor.dir/includes_C.rsp
-CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj: C:/Users/28693/Desktop/ImageProcess/src/global_image_buffer.c
+CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/global_image_buffer.c
 CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj: CMakeFiles/video_processor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj -MF CMakeFiles\video_processor.dir\src\global_image_buffer.c.obj.d -o CMakeFiles\video_processor.dir\src\global_image_buffer.c.obj -c C:\Users\28693\Desktop\ImageProcess\src\global_image_buffer.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj"
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj -MF CMakeFiles\video_processor.dir\src\global_image_buffer.c.obj.d -o CMakeFiles\video_processor.dir\src\global_image_buffer.c.obj -c C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\global_image_buffer.c
 
 CMakeFiles/video_processor.dir/src/global_image_buffer.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/video_processor.dir/src/global_image_buffer.c.i"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\28693\Desktop\ImageProcess\src\global_image_buffer.c > CMakeFiles\video_processor.dir\src\global_image_buffer.c.i
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\global_image_buffer.c > CMakeFiles\video_processor.dir\src\global_image_buffer.c.i
 
 CMakeFiles/video_processor.dir/src/global_image_buffer.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/video_processor.dir/src/global_image_buffer.c.s"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\ImageProcess\src\global_image_buffer.c -o CMakeFiles\video_processor.dir\src\global_image_buffer.c.s
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\global_image_buffer.c -o CMakeFiles\video_processor.dir\src\global_image_buffer.c.s
 
 CMakeFiles/video_processor.dir/src/processor.c.obj: CMakeFiles/video_processor.dir/flags.make
 CMakeFiles/video_processor.dir/src/processor.c.obj: CMakeFiles/video_processor.dir/includes_C.rsp
-CMakeFiles/video_processor.dir/src/processor.c.obj: C:/Users/28693/Desktop/ImageProcess/src/processor.c
+CMakeFiles/video_processor.dir/src/processor.c.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.c
 CMakeFiles/video_processor.dir/src/processor.c.obj: CMakeFiles/video_processor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/video_processor.dir/src/processor.c.obj"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/processor.c.obj -MF CMakeFiles\video_processor.dir\src\processor.c.obj.d -o CMakeFiles\video_processor.dir\src\processor.c.obj -c C:\Users\28693\Desktop\ImageProcess\src\processor.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/video_processor.dir/src/processor.c.obj"
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/video_processor.dir/src/processor.c.obj -MF CMakeFiles\video_processor.dir\src\processor.c.obj.d -o CMakeFiles\video_processor.dir\src\processor.c.obj -c C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\processor.c
 
 CMakeFiles/video_processor.dir/src/processor.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/video_processor.dir/src/processor.c.i"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\28693\Desktop\ImageProcess\src\processor.c > CMakeFiles\video_processor.dir\src\processor.c.i
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\processor.c > CMakeFiles\video_processor.dir\src\processor.c.i
 
 CMakeFiles/video_processor.dir/src/processor.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/video_processor.dir/src/processor.c.s"
-	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\ImageProcess\src\processor.c -o CMakeFiles\video_processor.dir\src\processor.c.s
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\processor.c -o CMakeFiles\video_processor.dir\src\processor.c.s
 
 # Object files for target video_processor
 video_processor_OBJECTS = \
@@ -141,78 +141,78 @@ video_processor_OBJECTS = \
 # External object files for target video_processor
 video_processor_EXTERNAL_OBJECTS =
 
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/video_processor.cpp.obj
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/utils.cpp.obj
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/processor.c.obj
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/build.make
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_gapi.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_stitching.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_alphamat.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_aruco.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_bgsegm.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ccalib.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_cvv.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn_objdetect.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn_superres.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dpm.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_face.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_freetype.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_fuzzy.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_hdf.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_hfs.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_img_hash.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_intensity_transform.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_line_descriptor.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_mcc.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ovis.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_quality.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_rapid.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_reg.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_rgbd.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_saliency.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_sfm.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_signal.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_stereo.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_structured_light.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_superres.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_surface_matching.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_tracking.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_videostab.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_viz.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_wechat_qrcode.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xfeatures2d.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xobjdetect.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xphoto.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/Users/28693/Desktop/ImageProcess/install/lib/libimage_internal.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_shape.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_highgui.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_datasets.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_plot.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_text.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ml.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_phase_unwrapping.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_optflow.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ximgproc.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_video.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_videoio.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_imgcodecs.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_objdetect.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_calib3d.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_features2d.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_flann.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_photo.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_imgproc.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_core.dll.a
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/linkLibs.rsp
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/objects1.rsp
-C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable C:\Users\28693\Desktop\ImageProcess\install\bin\video_processor.exe"
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/video_processor.cpp.obj
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/utils.cpp.obj
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/src/processor.c.obj
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/build.make
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_gapi.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_stitching.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_alphamat.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_aruco.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_bgsegm.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ccalib.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_cvv.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn_objdetect.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn_superres.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dpm.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_face.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_freetype.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_fuzzy.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_hdf.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_hfs.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_img_hash.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_intensity_transform.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_line_descriptor.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_mcc.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ovis.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_quality.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_rapid.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_reg.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_rgbd.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_saliency.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_sfm.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_signal.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_stereo.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_structured_light.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_superres.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_surface_matching.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_tracking.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_videostab.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_viz.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_wechat_qrcode.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xfeatures2d.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xobjdetect.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_xphoto.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_shape.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_highgui.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_datasets.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_plot.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_text.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ml.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_phase_unwrapping.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_optflow.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_ximgproc.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_video.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_videoio.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_imgcodecs.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_objdetect.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_calib3d.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_dnn.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_features2d.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_flann.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_photo.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_imgproc.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: C:/msys64/mingw64/lib/libopencv_core.dll.a
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/linkLibs.rsp
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/objects1.rsp
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe: CMakeFiles/video_processor.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\bin\video_processor.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\video_processor.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/video_processor.dir/build: C:/Users/28693/Desktop/ImageProcess/install/bin/video_processor.exe
+CMakeFiles/video_processor.dir/build: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/video_processor.exe
 .PHONY : CMakeFiles/video_processor.dir/build
 
 CMakeFiles/video_processor.dir/clean:
@@ -220,6 +220,6 @@ CMakeFiles/video_processor.dir/clean:
 .PHONY : CMakeFiles/video_processor.dir/clean
 
 CMakeFiles/video_processor.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\28693\Desktop\ImageProcess C:\Users\28693\Desktop\ImageProcess C:\Users\28693\Desktop\ImageProcess\build C:\Users\28693\Desktop\ImageProcess\build C:\Users\28693\Desktop\ImageProcess\build\CMakeFiles\video_processor.dir\DependInfo.cmake "--color=$(COLOR)" video_processor
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\28693\Desktop\SMARTCAR\ImageProcess C:\Users\28693\Desktop\SMARTCAR\ImageProcess C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles\video_processor.dir\DependInfo.cmake "--color=$(COLOR)" video_processor
 .PHONY : CMakeFiles/video_processor.dir/depend
 

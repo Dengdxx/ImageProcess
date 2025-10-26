@@ -981,14 +981,14 @@ void cross_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, ui
 
 //直线检测函数
 uint8_t left_straight=0,right_straight=0,straight=0;
-void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,uint16_t height)
+void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,uint16_t end_l,uint16_t end_r)
 {
 	// 先清零
 	right_straight=0;
 	left_straight=0;
 	straight=0;
-	float left_variance = calculate_border_variance(start_l, height-5, l);//至少要减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
-	float right_variance = calculate_border_variance(start_r, height-5, r);
+	float left_variance = calculate_border_variance(start_l, end_l, l);//至少要减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
+	float right_variance = calculate_border_variance(start_r, end_r, r);
 
 	// 这里留了一个不那么严格的直线判断标准 值为2
 	left_straight = (left_variance < 10.0f)?1u:(left_variance < 40.0f?2u:0u);
@@ -998,22 +998,65 @@ void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,ui
 
 //环岛检测函数
 uint8_t island_flag=0;
-void island_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
+uint8_t first_corner=0;
+void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
-	island_flag=0;
-	match_result result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner, 7, 2, 0, 1);
-	match_result result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner, 7, 2, 0, 1);
+	uint16_t match_start_l=image_h-1,match_start_r=image_h-1;
+	match_result result_cl={0,0,0,0,0.0f};
+	match_result result_cr={0,0,0,0,0.0f};
+	first_corner=0;
+	/* 见到环岛第一个角点时 环的部分会有丢线 也就是last_left/right_lost_midstart非零 我们从midstart行开始反向匹配第一角点序列
+	   但midstart是从下往上数的行数 我们要找出它对应的dir_l/dir_r索引位置
+
+	   一般来说 在从下往上数的第y行上 一个点满足image_h-1-points_l/r[i][1]==y 其中i就是我们要找的dir_l/r的索引
+	   且i>=y 所以我们就可以在一个相对缩小的范围内 根据y搜出i
+	*/
+
+	//检测第一角点 如果没有中间丢线 直接返回
+	if(last_left_lost_midstart==0&&last_right_lost_midstart==0)
+	    //return;
+		;
+	//左丢右不丢
+    else if(last_left_lost_midstart!=0&&last_right_lost_midstart==0)
+	{
+	for(uint16_t i=last_left_lost_midstart; i<image_h; i++)//point_l/r和dir_l/r的索引在图像下端为0 且一一对应
+	{
+		if(image_h-1-last_left_lost_midstart==points_l[i][1])
+		{
+			match_start_l=i;
+			break;
+		}
+	}
+	result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner, 7, 3, /*match_start_l*/119, -1);
+    }
+
+	//右丢左不丢
+	else if(last_left_lost_midstart==0&&last_right_lost_midstart!=0)
+	{
+	for(uint16_t i=last_right_lost_midstart; i<image_h; i++)//point_l/r和dir_l/r的索引在图像下端为0 且一一对应
+	{
+		if(image_h-1-last_right_lost_midstart==points_r[i][1])
+		{
+			match_start_r=i;
+			break;
+		}
+	}
+	result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner, 7, 3, match_start_r, -1);
+    }
+
 	if((left_straight!=0)&&result_cr.matched)
 	{
-		island_flag=1;
+		first_corner=1;
 		// 右环
 	}
 	else if((right_straight!=0)&&result_cl.matched)
 	{
-		island_flag=2;
+		first_corner=2;
 		// 左环
 	}
-	log_add_uint8("island_flag", island_flag, -1);
+    log_add_uint8("result_cl.matched",result_cl.matched,-1);
+	log_add_uint8("result_cr.matched",result_cr.matched,-1);
+	log_add_uint8("first_corner", first_corner, -1);
 }
 
 
@@ -1024,23 +1067,24 @@ void island_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, u
 */
 void userlog()
 {
-	log_add_uint8_array("right_lost", right_lost, image_h,-1);
-	log_add_uint8_array("left_lost", left_lost, image_h,-1);
-	//log_add_uint8_array("l_border", l_border, image_h,-1);
-	//log_add_uint8_array("r_border", r_border, image_h,-1);
-	//log_add_uint8("left_straight", left_straight, -1);
-	//log_add_uint8("right_straight", right_straight, -1);
-	//log_add_uint8("cross_flag", cross_flag, -1);
-	log_add_uint8("last_left_lost_up", last_left_lost_up, -1);
-	log_add_uint8("last_left_lost_down", last_left_lost_down, -1);
-	log_add_uint8("last_lost_left_midstart", last_left_lost_midstart, -1);
-	log_add_uint8("last_lost_left_midend", last_left_lost_midend, -1);
-	log_add_uint8("last_right_lost_up", last_right_lost_up, -1);
-	log_add_uint8("last_right_lost_down", last_right_lost_down, -1);
-	log_add_uint8("last_lost_right_midstart", last_right_lost_midstart, -1);
-	log_add_uint8("last_lost_right_midend", last_right_lost_midend, -1);
-	//log_add_uint16_array("dir_l", dir_l, data_stastics_l,-1);
-	//log_add_uint16_array("dir_r", dir_r, data_stastics_r,-1);
+	//log_add_uint8_array("左 丢left_lost", left_lost, image_h,-1);
+	//log_add_uint8_array("右 丢right_lost", right_lost, image_h,-1);
+	//log_add_uint8_array("左边 最终l_border", l_border, image_h,-1);
+	//log_add_uint8_array("右边 最终r_border", r_border, image_h,-1);
+	log_add_uint8("左直left_straight", left_straight, -1);
+	log_add_uint8("右直right_straight", right_straight, -1);
+	//log_add_uint8("环 1右2左island_flag", island_flag, -1);
+	//log_add_uint8("十字路口cross_flag", cross_flag, -1);
+	//log_add_uint8("左 上 丢last_left_lost_up", last_left_lost_up, -1);
+	//log_add_uint8("左 下 丢last_left_lost_down", last_left_lost_down, -1);
+	//log_add_uint8("左 中 丢last_left_lost_midstart", last_left_lost_midstart, -1);
+	//log_add_uint8("左 中 丢last_left_lost_midend", last_left_lost_midend, -1);
+	//log_add_uint8("右 上 丢last_right_lost_up", last_right_lost_up, -1);
+	//log_add_uint8("右 下 丢last_right_lost_down", last_right_lost_down, -1);
+	//log_add_uint8("右 中 丢last_right_lost_midstart", last_right_lost_midstart, -1);
+	//log_add_uint8("右 中 丢last_right_lost_midend", last_right_lost_midend, -1);
+	log_add_uint16_array("左 生长dir_l", dir_l, data_stastics_l,-1);
+	log_add_uint16_array("右 生长dir_r", dir_r, data_stastics_r,-1);
 }
 
 
@@ -1074,8 +1118,8 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
 	get_right(data_stastics_r);
 	//处理函数放这里 不要放到if外面
     cross_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字检测
-	straight_detect(l_border, r_border, last_left_lost_down, last_right_lost_down, image_h);//直线检测
-	island_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);
+	straight_detect(l_border, r_border, last_left_lost_down, last_right_lost_down, last_left_lost_up, last_right_lost_up);//直线检测
+	firstcorner_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);
 }
     //求中线
 	for (i = Hightest; i < image_h; i++)

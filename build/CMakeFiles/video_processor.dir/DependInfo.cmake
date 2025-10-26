@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/28693/Desktop/ImageProcess/src/global_image_buffer.c" "CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj" "gcc" "CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/processor.c" "CMakeFiles/video_processor.dir/src/processor.c.obj" "gcc" "CMakeFiles/video_processor.dir/src/processor.c.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/utils.cpp" "CMakeFiles/video_processor.dir/src/utils.cpp.obj" "gcc" "CMakeFiles/video_processor.dir/src/utils.cpp.obj.d"
-  "C:/Users/28693/Desktop/ImageProcess/src/video_processor.cpp" "CMakeFiles/video_processor.dir/src/video_processor.cpp.obj" "gcc" "CMakeFiles/video_processor.dir/src/video_processor.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/global_image_buffer.c" "CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj" "gcc" "CMakeFiles/video_processor.dir/src/global_image_buffer.c.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.c" "CMakeFiles/video_processor.dir/src/processor.c.obj" "gcc" "CMakeFiles/video_processor.dir/src/processor.c.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/utils.cpp" "CMakeFiles/video_processor.dir/src/utils.cpp.obj" "gcc" "CMakeFiles/video_processor.dir/src/utils.cpp.obj.d"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/video_processor.cpp" "CMakeFiles/video_processor.dir/src/video_processor.cpp.obj" "gcc" "CMakeFiles/video_processor.dir/src/video_processor.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

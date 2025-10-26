@@ -1,2 +1,2 @@
-C:\msys64\mingw64\bin\ar.exe qc C:\Users\28693\Desktop\ImageProcess\install\lib\libimage_internal.a CMakeFiles/image_internal.dir/src/global_image_buffer.c.obj CMakeFiles/image_internal.dir/src/image.c.obj CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj CMakeFiles/image_internal.dir/src/utils.cpp.obj
-C:\msys64\mingw64\bin\ranlib.exe C:\Users\28693\Desktop\ImageProcess\install\lib\libimage_internal.a
+C:\msys64\mingw64\bin\ar.exe qc C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\lib\libimage_internal.a CMakeFiles/image_internal.dir/src/global_image_buffer.c.obj CMakeFiles/image_internal.dir/src/image.c.obj CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj CMakeFiles/image_internal.dir/src/utils.cpp.obj
+C:\msys64\mingw64\bin\ranlib.exe C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\lib\libimage_internal.a

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "C:/Users/28693/Desktop/ImageProcess/install/lib/libimage_internal.a"
-  "C:/Users/28693/Desktop/ImageProcess/install/lib/libimage_internal.pdb"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.pdb"
   "CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj"
   "CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj.d"
   "CMakeFiles/image_internal.dir/src/global_image_buffer.c.obj"

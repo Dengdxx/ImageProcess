@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "C:/Users/28693/Desktop/ImageProcess/install/bin/imageprocessor.exe"
-  "C:/Users/28693/Desktop/ImageProcess/install/bin/imageprocessor.exe.manifest"
-  "C:/Users/28693/Desktop/ImageProcess/install/bin/imageprocessor.pdb"
-  "C:/Users/28693/Desktop/ImageProcess/install/lib/libimageprocessor.dll.a"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/imageprocessor.exe"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/imageprocessor.exe.manifest"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/bin/imageprocessor.pdb"
+  "C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimageprocessor.dll.a"
   "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj"
   "CMakeFiles/imageprocessor.dir/src/csv_reader.cpp.obj.d"
   "CMakeFiles/imageprocessor.dir/src/dynamic_log.cpp.obj"
