@@ -458,6 +458,13 @@ void get_left(uint16_t total_L)
 			}
 		}
 	}
+    // 角落糊了还是没办法 手动补一下
+	if(last_left_lost_midstart<=10&&last_left_lost_midstart!=0)
+	{
+		last_left_lost_midstart=0;
+		last_left_lost_down=last_left_lost_midend;
+		last_left_lost_midend=0;
+	}
 }
 /*
 函数名称：void get_right(uint16 total_R)
@@ -520,7 +527,7 @@ void get_right(uint16_t total_R)
 	//判断是否还有一段丢线
 	if(right_lost_num-temp_lost_num>=3)// 这里3为了抗噪
 	{
-		//如果有中间段 从上往下看 因为下面两个角落经常糊
+		//如果有中间段 从上往下找 因为下面两个角落经常糊
 		for(uint8_t row=last_right_lost_up-2;row>=last_right_lost_down+2;row--)
 		{
 			if(right_lost[row]==1&&right_lost[row+1]==0&&/*right_lost[row+2]==0&&*/last_right_lost_midend==0)
@@ -533,6 +540,13 @@ void get_right(uint16_t total_R)
 				break;
 			}
 		}
+	}
+	// 角落糊了还是没办法 手动补一下
+	if(last_right_lost_midstart<=10&&last_right_lost_midstart!=0)
+	{
+		last_right_lost_midstart=0;
+		last_right_lost_down=last_right_lost_midend;
+		last_right_lost_midend=0;
 	}
 }
 
@@ -644,38 +658,45 @@ match_result match_strict_sequence_with_gaps(
 
     if (direction == 1) {
         // 正向匹配：pattern[0] -> pattern[pattern_len-1]
-        for (size_t i = start_pos; i < input_len; i++) {
-            if (input_len - i < pattern_len - pat_idx) break;
+        // 使用步长为1的滑动窗口，确保尝试每个位置作为起点
+        for (size_t window_start = start_pos; window_start < input_len; window_start++) {
+            // 检查剩余长度是否足够
+            if (input_len - window_start < pattern_len) break;
+            
+            // 重置匹配状态，从新的窗口起点开始
+            pat_idx = 0;
+            current_gap = 0;
+            total_gap = 0;
+            match_start = 0;
+            
+            // 从 window_start 开始向后匹配
+            for (size_t i = window_start; i < input_len; i++) {
+                if (input[i] == pattern[pat_idx]) {
+                    if (pat_idx == 0) match_start = i;
+                    if (pat_idx > 0) total_gap += current_gap;
+                    pat_idx++;
+                    current_gap = 0;
 
-            if (input[i] == pattern[pat_idx]) {
-                if (pat_idx == 0) match_start = i;
-                if (pat_idx > 0) total_gap += current_gap;
-                pat_idx++;
-                current_gap = 0;
-
-                if (pat_idx == pattern_len) {
-                    result.matched = 1;
-                    result.total_gap = total_gap;
-                    result.start = (uint16_t)match_start;
-                    result.end = (uint16_t)i;
-                    uint16_t max_possible_gap = (uint16_t)(pattern_len - 1) * max_gap;
-                    if (max_possible_gap == 0) {
-                        result.confidence = (total_gap == 0) ? 1.0f : 0.0f;
-                    } else {
-                        result.confidence = 1.0f - (float)total_gap / (float)max_possible_gap;
+                    if (pat_idx == pattern_len) {
+                        // 匹配成功！
+                        result.matched = 1;
+                        result.total_gap = total_gap;
+                        result.start = (uint16_t)match_start;
+                        result.end = (uint16_t)i;
+                        uint16_t max_possible_gap = (uint16_t)(pattern_len - 1) * max_gap;
+                        if (max_possible_gap == 0) {
+                            result.confidence = (total_gap == 0) ? 1.0f : 0.0f;
+                        } else {
+                            result.confidence = 1.0f - (float)total_gap / (float)max_possible_gap;
+                        }
+                        return result;
                     }
-                    return result;
-                }
-            } else {
-                if (pat_idx > 0) {
-                    current_gap++;
-                    if (current_gap > max_gap) {
-                        pat_idx = 0;
-                        current_gap = 0;
-                        total_gap = 0;
-                        if (input[i] == pattern[0]) {
-                            pat_idx = 1;
-                            match_start = i;
+                } else {
+                    if (pat_idx > 0) {
+                        current_gap++;
+                        if (current_gap > max_gap) {
+                            // gap超限，当前窗口匹配失败，跳到下一个窗口
+                            break;
                         }
                     }
                 }
@@ -683,44 +704,49 @@ match_result match_strict_sequence_with_gaps(
         }
     } else if (direction == -1) {
         // 反向匹配：按 pattern[pattern_len-1] -> pattern[0] 顺序匹配
+        // 使用步长为1的滑动窗口，确保尝试每个位置作为起点
         int start = (int)start_pos >= (int)input_len ? (int)input_len - 1 : (int)start_pos;
-        for (int i = start; i >= 0; i--) {
-            if (i + 1 < (int)(pattern_len - pat_idx)) break;
-
-            size_t reverse_pat_idx = pattern_len - 1 - pat_idx;
-
-            if (input[i] == pattern[reverse_pat_idx]) {
-                if (pat_idx == 0) match_start = i;
-                if (pat_idx > 0) total_gap += current_gap;
-                pat_idx++;
-                current_gap = 0;
-
-                if (pat_idx == pattern_len) {
-                    result.matched = 1;
-                    result.total_gap = total_gap;
-                    // 反向时 match_start 为第一次匹配（pattern末端）的位置，
-                    // i 为最后匹配（pattern首端）的位置，返回保持绝对索引
-                    result.start = (uint16_t)i;
-                    result.end = (uint16_t)match_start;
-                    uint16_t max_possible_gap = (uint16_t)(pattern_len - 1) * max_gap;
-                    if (max_possible_gap == 0) {
-                        result.confidence = (total_gap == 0) ? 1.0f : 0.0f;
-                    } else {
-                        result.confidence = 1.0f - (float)total_gap / (float)max_possible_gap;
+        
+        for (int window_start = start; window_start >= 0; window_start--) {
+            // 检查剩余长度是否足够
+            if (window_start + 1 < (int)pattern_len) break;
+            
+            // 重置匹配状态，从新的窗口起点开始
+            pat_idx = 0;
+            current_gap = 0;
+            total_gap = 0;
+            match_start = 0;
+            
+            // 从 window_start 开始向前匹配
+            for (int i = window_start; i >= 0; i--) {
+                size_t reverse_pat_idx = pattern_len - 1 - pat_idx;
+                
+                if (input[i] == pattern[reverse_pat_idx]) {
+                    if (pat_idx == 0) match_start = i;
+                    if (pat_idx > 0) total_gap += current_gap;
+                    pat_idx++;
+                    current_gap = 0;
+                    
+                    if (pat_idx == pattern_len) {
+                        // 匹配成功！
+                        result.matched = 1;
+                        result.total_gap = total_gap;
+                        result.start = (uint16_t)i;
+                        result.end = (uint16_t)match_start;
+                        uint16_t max_possible_gap = (uint16_t)(pattern_len - 1) * max_gap;
+                        if (max_possible_gap == 0) {
+                            result.confidence = (total_gap == 0) ? 1.0f : 0.0f;
+                        } else {
+                            result.confidence = 1.0f - (float)total_gap / (float)max_possible_gap;
+                        }
+                        return result;
                     }
-                    return result;
-                }
-            } else {
-                if (pat_idx > 0) {
-                    current_gap++;
-                    if (current_gap > max_gap) {
-                        pat_idx = 0;
-                        current_gap = 0;
-                        total_gap = 0;
-                        size_t first_pat_idx = pattern_len - 1;
-                        if (input[i] == pattern[first_pat_idx]) {
-                            pat_idx = 1;
-                            match_start = i;
+                } else {
+                    if (pat_idx > 0) {
+                        current_gap++;
+                        if (current_gap > max_gap) {
+                            // gap超限，当前窗口匹配失败，跳到下一个窗口
+                            break;
                         }
                     }
                 }
@@ -756,35 +782,42 @@ match_result match_strict_sequence_with_gaps_u8(
 
     if (direction == 1) {
         // 正向匹配：从 pattern[0] 到 pattern[pattern_len-1]
-        for (size_t i = start_pos; i < input_len; i++) {
-            if (input_len - i < pattern_len - pat_idx) break;
+        // 使用步长为1的滑动窗口，确保尝试每个位置作为起点
+        for (size_t window_start = start_pos; window_start < input_len; window_start++) {
+            // 检查剩余长度是否足够
+            if (input_len - window_start < pattern_len) break;
             
-            if (input[i] == pattern[pat_idx]) {
-                if (pat_idx == 0) match_start = i;
-                if (pat_idx > 0) total_gap += current_gap;
-                pat_idx++;
-                current_gap = 0;
-                
-                if (pat_idx == pattern_len) {
-                    result.matched = 1;
-                    result.start = (uint8_t)match_start;
-                    result.end = (uint8_t)i;
-                    result.total_gap = total_gap;
-                    uint8_t max_possible_gap = (uint8_t)(pattern_len - 1) * max_gap;
-                    result.confidence = (max_possible_gap == 0) ? ((total_gap == 0) ? 1.0f : 0.0f)
-                        : 1.0f - (float)total_gap / (float)max_possible_gap;
-                    return result;
-                }
-            } else {
-                if (pat_idx > 0) {
-                    current_gap++;
-                    if (current_gap > max_gap) {
-                        pat_idx = 0;
-                        current_gap = 0;
-                        total_gap = 0;
-                        if (input[i] == pattern[0]) {
-                            pat_idx = 1;
-                            match_start = i;
+            // 重置匹配状态，从新的窗口起点开始
+            pat_idx = 0;
+            current_gap = 0;
+            total_gap = 0;
+            match_start = 0;
+            
+            // 从 window_start 开始向后匹配
+            for (size_t i = window_start; i < input_len; i++) {
+                if (input[i] == pattern[pat_idx]) {
+                    if (pat_idx == 0) match_start = i;
+                    if (pat_idx > 0) total_gap += current_gap;
+                    pat_idx++;
+                    current_gap = 0;
+                    
+                    if (pat_idx == pattern_len) {
+                        // 匹配成功！
+                        result.matched = 1;
+                        result.start = (uint8_t)match_start;
+                        result.end = (uint8_t)i;
+                        result.total_gap = total_gap;
+                        uint8_t max_possible_gap = (uint8_t)(pattern_len - 1) * max_gap;
+                        result.confidence = (max_possible_gap == 0) ? ((total_gap == 0) ? 1.0f : 0.0f)
+                            : 1.0f - (float)total_gap / (float)max_possible_gap;
+                        return result;
+                    }
+                } else {
+                    if (pat_idx > 0) {
+                        current_gap++;
+                        if (current_gap > max_gap) {
+                            // gap超限，当前窗口匹配失败，跳到下一个窗口
+                            break;
                         }
                     }
                 }
@@ -792,41 +825,47 @@ match_result match_strict_sequence_with_gaps_u8(
         }
     } else if (direction == -1) {
         // 反向匹配：从 pattern[pattern_len-1] 倒着到 pattern[0]
+        // 使用步长为1的滑动窗口，确保尝试每个位置作为起点
         int start = (int)start_pos >= (int)input_len ? (int)input_len - 1 : (int)start_pos;
         
-        for (int i = start; i >= 0; i--) {
-            if (i + 1 < (int)(pattern_len - pat_idx)) break;
+        for (int window_start = start; window_start >= 0; window_start--) {
+            // 检查剩余长度是否足够
+            if (window_start + 1 < (int)pattern_len) break;
             
-            // 关键：反向匹配时，从 pattern 末尾开始
-            size_t reverse_pat_idx = pattern_len - 1 - pat_idx;
+            // 重置匹配状态，从新的窗口起点开始
+            pat_idx = 0;
+            current_gap = 0;
+            total_gap = 0;
+            match_start = 0;
             
-            if (input[i] == pattern[reverse_pat_idx]) {
-                if (pat_idx == 0) match_start = i;
-                if (pat_idx > 0) total_gap += current_gap;
-                pat_idx++;
-                current_gap = 0;
+            // 从 window_start 开始向前匹配
+            for (int i = window_start; i >= 0; i--) {
+                // 关键：反向匹配时，从 pattern 末尾开始
+                size_t reverse_pat_idx = pattern_len - 1 - pat_idx;
                 
-                if (pat_idx == pattern_len) {
-                    result.matched = 1;
-                    result.start = (uint8_t)i;           // 反向时end在前
-                    result.end = (uint8_t)match_start;   // start在后
-                    result.total_gap = total_gap;
-                    uint8_t max_possible_gap = (uint8_t)(pattern_len - 1) * max_gap;
-                    result.confidence = (max_possible_gap == 0) ? ((total_gap == 0) ? 1.0f : 0.0f)
-                        : 1.0f - (float)total_gap / (float)max_possible_gap;
-                    return result;
-                }
-            } else {
-                if (pat_idx > 0) {
-                    current_gap++;
-                    if (current_gap > max_gap) {
-                        pat_idx = 0;
-                        current_gap = 0;
-                        total_gap = 0;
-                        size_t first_pat_idx = pattern_len - 1;
-                        if (input[i] == pattern[first_pat_idx]) {
-                            pat_idx = 1;
-                            match_start = i;
+                if (input[i] == pattern[reverse_pat_idx]) {
+                    if (pat_idx == 0) match_start = i;
+                    if (pat_idx > 0) total_gap += current_gap;
+                    pat_idx++;
+                    current_gap = 0;
+                    
+                    if (pat_idx == pattern_len) {
+                        // 匹配成功！
+                        result.matched = 1;
+                        result.start = (uint8_t)i;           // 反向时end在前
+                        result.end = (uint8_t)match_start;   // start在后
+                        result.total_gap = total_gap;
+                        uint8_t max_possible_gap = (uint8_t)(pattern_len - 1) * max_gap;
+                        result.confidence = (max_possible_gap == 0) ? ((total_gap == 0) ? 1.0f : 0.0f)
+                            : 1.0f - (float)total_gap / (float)max_possible_gap;
+                        return result;
+                    }
+                } else {
+                    if (pat_idx > 0) {
+                        current_gap++;
+                        if (current_gap > max_gap) {
+                            // gap超限，当前窗口匹配失败，跳到下一个窗口
+                            break;
                         }
                     }
                 }
@@ -845,7 +884,7 @@ growth_array arr = {
     .outer = {1,1,1,1,1,1},
 	.up_inner={4,4,4,4,4,4},
     .inner = {5,5,5,5,5,5},       
-    .corner = {4,4,3,2,1,1,1}
+    .corner2 = {2,1,1,1}
 };
 
 /** 
@@ -1001,7 +1040,7 @@ uint8_t island_flag=0;
 uint8_t first_corner=0;
 void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
-	uint16_t match_start_l=image_h-1,match_start_r=image_h-1;
+	uint16_t match_start_l=total_num_l-1,match_start_r=total_num_r-1;
 	match_result result_cl={0,0,0,0,0.0f};
 	match_result result_cr={0,0,0,0,0.0f};
 	first_corner=0;
@@ -1012,36 +1051,48 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	   且i>=y 所以我们就可以在一个相对缩小的范围内 根据y搜出i
 	*/
 
-	//检测第一角点 如果没有中间丢线 直接返回
+	//如果没有中间丢线 直接返回
 	if(last_left_lost_midstart==0&&last_right_lost_midstart==0)
 	    //return;
 		;
-	//左丢右不丢
+	//中部左丢右不丢 检测左第一角点
     else if(last_left_lost_midstart!=0&&last_right_lost_midstart==0)
 	{
-	for(uint16_t i=last_left_lost_midstart; i<image_h; i++)//point_l/r和dir_l/r的索引在图像下端为0 且一一对应
+	// 将 l_border 索引转换为原始图像 y 坐标
+	uint16_t target_y = image_h - 1 - last_left_lost_midstart;
+	// 从 last_left_lost_midstart 开始搜索，必能找到或越过目标行
+	for(uint16_t i=last_left_lost_midstart; i<total_num_l; i++)
 	{
-		if(image_h-1-last_left_lost_midstart==points_l[i][1])
+		if(points_l[i][1] == target_y)
 		{
 			match_start_l=i;
 			break;
 		}
+		// 提前终止：如果 y 坐标已经比 target_y 小（更靠近顶部），说明已越过目标行，但一般不会
+		if(points_l[i][1] <= target_y)
+			break;
 	}
-	result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner, 7, 3, /*match_start_l*/119, -1);
+	result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner2, 4, 2, match_start_l, -1);
     }
 
-	//右丢左不丢
+	//中部右丢左不丢 检测右第一角点
 	else if(last_left_lost_midstart==0&&last_right_lost_midstart!=0)
 	{
-	for(uint16_t i=last_right_lost_midstart; i<image_h; i++)//point_l/r和dir_l/r的索引在图像下端为0 且一一对应
+	// 将 r_border 索引转换为原始图像 y 坐标
+	uint16_t target_y = image_h - 1 - last_right_lost_midstart;
+	// 从 last_right_lost_midstart 开始搜索，必能找到或越过目标行
+	for(uint16_t i=last_right_lost_midstart; i<total_num_r; i++)
 	{
-		if(image_h-1-last_right_lost_midstart==points_r[i][1])
+		if(points_r[i][1] == target_y)
 		{
 			match_start_r=i;
 			break;
 		}
+		// 提前终止：如果 y 坐标已经比 target_y 小（更靠近顶部），说明已越过目标行，但一般不会
+		if(points_r[i][1] <= target_y)
+			break;
 	}
-	result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner, 7, 3, match_start_r, -1);
+	result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner2, 4, 2, match_start_r, -1);
     }
 
 	if((left_straight!=0)&&result_cr.matched)
@@ -1055,7 +1106,9 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 		// 左环
 	}
     log_add_uint8("result_cl.matched",result_cl.matched,-1);
+	log_add_float("result_cl.confidence",result_cl.confidence,-1);
 	log_add_uint8("result_cr.matched",result_cr.matched,-1);
+	log_add_float("result_cr.confidence",result_cr.confidence,-1);
 	log_add_uint8("first_corner", first_corner, -1);
 }
 
@@ -1077,11 +1130,11 @@ void userlog()
 	//log_add_uint8("十字路口cross_flag", cross_flag, -1);
 	//log_add_uint8("左 上 丢last_left_lost_up", last_left_lost_up, -1);
 	//log_add_uint8("左 下 丢last_left_lost_down", last_left_lost_down, -1);
-	//log_add_uint8("左 中 丢last_left_lost_midstart", last_left_lost_midstart, -1);
+	log_add_uint8("左 中 丢last_left_lost_midstart", last_left_lost_midstart, -1);
 	//log_add_uint8("左 中 丢last_left_lost_midend", last_left_lost_midend, -1);
 	//log_add_uint8("右 上 丢last_right_lost_up", last_right_lost_up, -1);
 	//log_add_uint8("右 下 丢last_right_lost_down", last_right_lost_down, -1);
-	//log_add_uint8("右 中 丢last_right_lost_midstart", last_right_lost_midstart, -1);
+	log_add_uint8("右 中 丢last_right_lost_midstart", last_right_lost_midstart, -1);
 	//log_add_uint8("右 中 丢last_right_lost_midend", last_right_lost_midend, -1);
 	log_add_uint16_array("左 生长dir_l", dir_l, data_stastics_l,-1);
 	log_add_uint16_array("右 生长dir_r", dir_r, data_stastics_r,-1);
