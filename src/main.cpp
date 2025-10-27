@@ -29,6 +29,7 @@ static GtkWidget *image_area;
 static GtkWidget *original_array_area;
 static GtkWidget *imo_image_view;
 static GdkPixbuf *current_image = NULL;
+static gchar *g_application_path = NULL; // 全局变量，存储程序路径
 
 // 全局二维数组已在 global_image_buffer.h/c 定义
 static int image_width = IMAGE_W;
@@ -71,18 +72,16 @@ static GdkPixbuf* scale_pixbuf_to_fit(GdkPixbuf *pixbuf, int max_width, int max_
 // 从 pixbuf 填充 original_bi_image
 static gboolean pixbuf_to_binary_array(GdkPixbuf *pixbuf);
 
-// 载图按钮
-static void upload_image_clicked(GtkWidget *widget, gpointer data);
+// 媒体文件处理
+static void open_media_clicked(GtkWidget *widget, gpointer data);
 static gboolean load_png_image(const gchar *filename);
 static gboolean load_jpeg_image(const gchar *filename);
-static gboolean is_png_file(const gchar *filename);
-static gboolean is_jpeg_file(const gchar *filename);
 static GdkPixbuf* render_bw_array_pixbuf(uint8_t **arr, int w, int h, int pixel_size);
 static GdkPixbuf* render_imo_array_pixbuf(uint8_t **arr, int w, int h, int pixel_size);
 
 #ifdef HAVE_OPENCV
 // 视频导入相关回调
-static void open_video_clicked(GtkWidget *widget, gpointer data);
+// open_video_clicked is now merged into open_media_clicked
 static void next_frame_clicked(GtkWidget *widget, gpointer data);
 static void prev_frame_clicked(GtkWidget *widget, gpointer data);
 static void show_cv_frame(const cv::Mat &frame);
@@ -97,9 +96,47 @@ static void update_progress_bar();
 static void load_log_csv_clicked(GtkWidget *widget, gpointer data);
 static void update_log_display(int frame_index);
 static void open_oscilloscope_clicked(GtkWidget *widget, gpointer data);
+static void reset_button_clicked(GtkWidget *widget, gpointer data);
+
+// Thumbnail generation functions
+static void on_thumb_clicked(GtkWidget *widget, gpointer user_data);
+gboolean add_thumbnail_ui(gpointer user_data);
+gpointer thumbnail_worker_thread(gpointer data);
 #endif
 
+// 全局重置函数 - 通过重启进程实现
+static void reset_button_clicked(GtkWidget *widget, gpointer data) {
+    if (g_application_path) {
+        // 在Windows上，使用 "start" 命令可以在新的命令窗口中启动程序，
+        // 并且不会阻塞当前进程。第一个空的双引号是标题。
+        std::string command = "start \"\" \"" + std::string(g_application_path) + "\"";
+        
+        // 执行命令
+        system(command.c_str());
+        
+        // 退出当前应用程序实例
+        GtkApplication *app = gtk_window_get_application(GTK_WINDOW(window));
+        if (G_IS_APPLICATION(app)) {
+            g_application_quit(G_APPLICATION(app));
+        }
+    } else {
+        // Fallback: 如果获取路径失败，则显示错误
+        GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), 
+                                                 GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                 GTK_MESSAGE_ERROR, 
+                                                 GTK_BUTTONS_CLOSE,
+                                                 "无法获取程序路径，无法重启");
+        gtk_dialog_run(GTK_DIALOG(err));
+        gtk_widget_destroy(err);
+    }
+}
+
 int main(int argc, char **argv) {
+    // 保存程序路径，用于重启
+    if (argc > 0 && argv[0]) {
+        g_application_path = g_strdup(argv[0]);
+    }
+
     GtkApplication *app;
     int status;
     app = gtk_application_new("com.example.binaryimage", G_APPLICATION_DEFAULT_FLAGS);
@@ -108,6 +145,7 @@ int main(int argc, char **argv) {
     g_object_unref(app);
 
     free_binary_image_data();
+    g_free(g_application_path); // 释放路径内存
     return status;
 }
 
@@ -126,15 +164,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-    GtkWidget *upload_button = gtk_button_new_with_label("上传PNG/JPEG二值图");
-    g_signal_connect(upload_button, "clicked", G_CALLBACK(upload_image_clicked), NULL);
-    gtk_box_pack_start(GTK_BOX(hbox), upload_button, FALSE, FALSE, 0);
+    GtkWidget *open_media_btn = gtk_button_new_with_label("打开文件");
+    g_signal_connect(open_media_btn, "clicked", G_CALLBACK(open_media_clicked), NULL);
+    gtk_box_pack_start(GTK_BOX(hbox), open_media_btn, FALSE, FALSE, 0);
+
+    GtkWidget *reset_btn = gtk_button_new_with_label("重置");
+    g_signal_connect(reset_btn, "clicked", G_CALLBACK(reset_button_clicked), NULL);
+    gtk_box_pack_start(GTK_BOX(hbox), reset_btn, FALSE, FALSE, 0);
 
 #ifdef HAVE_OPENCV
-    GtkWidget *open_video_btn = gtk_button_new_with_label("导入视频(mp4)");
-    gtk_box_pack_start(GTK_BOX(hbox), open_video_btn, FALSE, FALSE, 0);
-    g_signal_connect(open_video_btn, "clicked", G_CALLBACK(open_video_clicked), NULL);
-
     GtkWidget *load_log_btn = gtk_button_new_with_label("加载日志CSV");
     gtk_box_pack_start(GTK_BOX(hbox), load_log_btn, FALSE, FALSE, 0);
     g_signal_connect(load_log_btn, "clicked", G_CALLBACK(load_log_csv_clicked), NULL);
@@ -355,14 +393,19 @@ static gboolean pixbuf_to_binary_array(GdkPixbuf *pixbuf) {
     return TRUE;
 }
 
-static gboolean is_png_file(const gchar *filename) {
-    // 简单检查：任何文件都允许尝试加载，让 GdkPixbuf 自己判断格式
-    return TRUE;
-}
+#include <cctype>
+#include <algorithm>
 
-static gboolean is_jpeg_file(const gchar *filename) {
-    // 简单检查：任何文件都允许尝试加载，让 GdkPixbuf 自己判断格式
-    return TRUE;
+// ... (other includes)
+
+// Helper function to get lowercased file extension
+static std::string get_file_extension(const std::string& filename) {
+    size_t dot_pos = filename.find_last_of(".");
+    if (dot_pos == std::string::npos) return "";
+    std::string ext = filename.substr(dot_pos + 1);
+    std::transform(ext.begin(), ext.end(), ext.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return ext;
 }
 
 static gboolean load_png_image(const gchar *filename) {
@@ -433,36 +476,119 @@ static gboolean load_jpeg_image(const gchar *filename) {
     return ok;
 }
 
-static void upload_image_clicked(GtkWidget *widget, gpointer data) {
+static void open_media_clicked(GtkWidget *widget, gpointer data) {
     GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new("选择图像文件", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
+    dialog = gtk_file_chooser_dialog_new("打开媒体文件", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
                                          "_取消", GTK_RESPONSE_CANCEL, "_打开", GTK_RESPONSE_ACCEPT, NULL);
-    GtkFileFilter *png_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(png_filter, "PNG 文件");
-    gtk_file_filter_add_pattern(png_filter, "*.png");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), png_filter);
-    GtkFileFilter *jpeg_filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(jpeg_filter, "JPEG 文件");
-    gtk_file_filter_add_pattern(jpeg_filter, "*.jpg");
-    gtk_file_filter_add_pattern(jpeg_filter, "*.jpeg");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), jpeg_filter);
+
+    // Filter for all supported types (default)
+    GtkFileFilter *filter_supported = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter_supported, "支持的媒体文件 (*.png, *.jpg, *.mp4)");
+    gtk_file_filter_add_pattern(filter_supported, "*.png");
+    gtk_file_filter_add_pattern(filter_supported, "*.jpg");
+    gtk_file_filter_add_pattern(filter_supported, "*.jpeg");
+    #ifdef HAVE_OPENCV
+    gtk_file_filter_add_pattern(filter_supported, "*.mp4");
+    #endif
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_supported);
+
+    // Filter for images
+    GtkFileFilter *filter_img = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter_img, "图像文件 (*.png, *.jpg, *.jpeg)");
+    gtk_file_filter_add_pattern(filter_img, "*.png");
+    gtk_file_filter_add_pattern(filter_img, "*.jpg");
+    gtk_file_filter_add_pattern(filter_img, "*.jpeg");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_img);
+
+    #ifdef HAVE_OPENCV
+    // Filter for videos
+    GtkFileFilter *filter_vid = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter_vid, "视频文件 (*.mp4)");
+    gtk_file_filter_add_pattern(filter_vid, "*.mp4");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_vid);
+    #endif
+
+    // Filter for all files
+    GtkFileFilter *filter_all = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter_all, "所有文件 (*.*)");
+    gtk_file_filter_add_pattern(filter_all, "*");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter_all);
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        gboolean loaded = FALSE;
-        if (is_png_file(filename)) loaded = load_png_image(filename);
-        else if (is_jpeg_file(filename)) loaded = load_jpeg_image(filename);
-        else {
-            GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
+        char *filename_c = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        std::string filename(filename_c ? filename_c : "");
+        g_free(filename_c);
+
+        if (!filename.empty()) {
+            std::string ext = get_file_extension(filename);
+            
+            if (ext == "png" || ext == "jpg" || ext == "jpeg") {
+                gboolean loaded = FALSE;
+                if (ext == "png") {
+                    loaded = load_png_image(filename.c_str());
+                } else {
+                    loaded = load_jpeg_image(filename.c_str());
+                }
+
+                if (loaded) {
+                    reset_image_views();
+                    refresh_all_views();
+                } else {
+                     GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                        GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+                                                        "无法加载图像文件。");
+                    gtk_dialog_run(GTK_DIALOG(err));
+                    gtk_widget_destroy(err);
+                }
+            #ifdef HAVE_OPENCV
+            } else if (ext == "mp4") {
+                // 当加载新视频时，重置所有与旧日志/CSV相关的状态
+                g_csv_reader.clear();
+                DynamicLogManager::getInstance().clearAll();
+                if (g_oscilloscope) {
+                    g_oscilloscope->clearAllChannels();
+                }
+                if (g_log_buffer) {
+                    gtk_text_buffer_set_text(g_log_buffer, "(新视频已加载, 请加载对应CSV)", -1);
+                }
+                g_csv_file_path.clear();
+
+                g_video_path = filename;
+                stop_playback();
+                if (g_cap.isOpened()) g_cap.release();
+                g_cap.open(g_video_path);
+                g_frame_index = 0;
+                if (g_cap.isOpened()) {
+                    cv::Mat frame; 
+                    if (g_cap.read(frame)) { 
+                        g_frame_index = 1; 
+                        show_cv_frame(frame);
+                        update_progress_bar();
+                    } else {
+                        GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                                GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "无法从此视频读取首帧。");
+                        gtk_dialog_run(GTK_DIALOG(err));
+                        gtk_widget_destroy(err);
+                    }
+                } else {
+                    GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                            GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "无法打开视频文件。");
+                    gtk_dialog_run(GTK_DIALOG(err));
+                    gtk_widget_destroy(err);
+                }
+            #endif
+            } else {
+                GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
                                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                                    "不支持的图像格式，请选择 PNG 或 JPEG");
-            gtk_dialog_run(GTK_DIALOG(err)); gtk_widget_destroy(err);
+                                                    "不支持的文件类型。请选择 PNG, JPG, 或 MP4 文件。");
+                gtk_dialog_run(GTK_DIALOG(err));
+                gtk_widget_destroy(err);
+            }
         }
-        if (loaded) reset_image_views(), refresh_all_views();
-        g_free(filename);
     }
     gtk_widget_destroy(dialog);
 }
+
 
 static void allocate_imo_array() {
     for (int i = 0; i < IMAGE_H; i++) {
@@ -838,6 +964,95 @@ static void show_cv_frame_OLD(const cv::Mat &frame) {
 
 typedef struct ThumbData { int frame_index; GtkWidget *dialog; } ThumbData;
 
+// Structure to pass data to the thumbnail worker thread
+typedef struct {
+    GtkWidget *grid;
+    GtkWidget *dialog;
+    std::string video_path;
+    int total_frames;
+    int current_frame;
+} ThumbnailThreadData;
+
+// Structure to pass data from the worker thread to the UI thread
+typedef struct {
+    GtkWidget *grid;
+    GtkWidget *dialog;
+    GdkPixbuf *pixbuf;
+    int frame_index;
+    int col;
+    int row;
+} ThumbnailUpdateData;
+
+// UI update function, runs in the main GTK thread
+gboolean add_thumbnail_ui(gpointer user_data) {
+    ThumbnailUpdateData *update_data = (ThumbnailUpdateData *)user_data;
+
+    GtkWidget *img = gtk_image_new_from_pixbuf(update_data->pixbuf);
+    g_object_unref(update_data->pixbuf); // The image now holds a reference
+
+    GtkWidget *btn = gtk_button_new();
+    gtk_container_add(GTK_CONTAINER(btn), img);
+
+    ThumbData *td = (ThumbData*)malloc(sizeof(ThumbData));
+    td->frame_index = update_data->frame_index;
+    td->dialog = update_data->dialog;
+    g_signal_connect(btn, "clicked", G_CALLBACK(on_thumb_clicked), td);
+
+    gtk_grid_attach(GTK_GRID(update_data->grid), btn, update_data->col, update_data->row, 1, 1);
+    gtk_widget_show(btn); // Show the button as it's added
+
+    g_free(update_data);
+    return G_SOURCE_REMOVE;
+}
+
+// Background worker thread function
+gpointer thumbnail_worker_thread(gpointer data) {
+    ThumbnailThreadData *thread_data = (ThumbnailThreadData *)data;
+
+    cv::VideoCapture cap;
+    cap.open(thread_data->video_path);
+    if (!cap.isOpened()) {
+        g_free(thread_data);
+        return NULL;
+    }
+
+    const int maxThumbs = 200;
+    int step = thread_data->total_frames / maxThumbs; 
+    if (step < 1) step = 1;
+
+    const int cols = 6;
+    int r = 0, c = 0;
+
+    for (int i = 0; i < thread_data->total_frames; i += step) {
+        cap.set(cv::CAP_PROP_POS_FRAMES, i);
+        cv::Mat frame;
+        if (!cap.read(frame)) break;
+
+        cv::Mat rgb, thumb;
+        cv::cvtColor(frame, rgb, cv::COLOR_BGR2RGB);
+        cv::resize(rgb, thumb, cv::Size(TARGET_WIDTH, TARGET_HEIGHT), 0, 0, cv::INTER_AREA);
+        GdkPixbuf *pb = pixbuf_from_rgb_mat_copy(thumb);
+        if (!pb) continue;
+
+        // Prepare data for UI update and invoke it on the main thread
+        ThumbnailUpdateData *update_data = g_new(ThumbnailUpdateData, 1);
+        update_data->grid = thread_data->grid;
+        update_data->dialog = thread_data->dialog;
+        update_data->pixbuf = pb; // Pass the pixbuf, UI thread will unref
+        update_data->frame_index = i;
+        update_data->col = c;
+        update_data->row = r;
+
+        g_main_context_invoke(NULL, add_thumbnail_ui, update_data);
+
+        if (++c >= cols) { c = 0; ++r; }
+    }
+
+    cap.release();
+    g_free(thread_data);
+    return NULL;
+}
+
 static void on_thumb_clicked(GtkWidget *widget, gpointer user_data)
 {
     ThumbData *td = (ThumbData*)user_data;
@@ -853,7 +1068,7 @@ static void on_thumb_clicked(GtkWidget *widget, gpointer user_data)
         }
     }
     if (td->dialog) gtk_widget_destroy(td->dialog);
-    free(td);
+    // Do not free td here, it's freed by GTK's object destruction process
 }
 
 static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
@@ -866,16 +1081,14 @@ static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
     
     stop_playback(); // 停止播放
 
-    // 获取总帧数与采样步长
     int total = (int)g_cap.get(cv::CAP_PROP_FRAME_COUNT);
     if (total <= 0) total = 3000; // 某些容器不返回帧数
-    const int maxThumbs = 200; // 限制最大缩略图数，避免内存与等待时间过大
-    int step = total / maxThumbs; if (step < 1) step = 1;
 
-    GtkWidget *dialog = gtk_dialog_new_with_buttons("选择帧", GTK_WINDOW(window), GTK_DIALOG_MODAL,
+    GtkWidget *dialog = gtk_dialog_new_with_buttons("选择帧 (加载中...)", GTK_WINDOW(window), GTK_DIALOG_MODAL,
                                                     "关闭", GTK_RESPONSE_CLOSE, NULL);
-    gtk_window_set_default_size(GTK_WINDOW(dialog), 1400, 900);  // 设置默认窗口大小
-    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);  // 居中显示
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 1400, 900);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
     
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
@@ -887,68 +1100,21 @@ static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
     gtk_grid_set_column_spacing(GTK_GRID(grid), 6);
     gtk_container_add(GTK_CONTAINER(scroll), grid);
 
-    // 生成缩略图
-    const int cols = 6; // 每行几列
-    int r = 0, c = 0;
-    double saved_pos = g_cap.get(cv::CAP_PROP_POS_FRAMES);
-    for (int i = 0; i < total; i += step) {
-        g_cap.set(cv::CAP_PROP_POS_FRAMES, i);
-        cv::Mat frame; if (!g_cap.read(frame)) break;
-        cv::Mat bgr = (frame.channels()==3) ? frame : (cv::Mat)cv::Mat();
-        if (frame.channels()!=3) cv::cvtColor(frame, bgr, cv::COLOR_GRAY2BGR);
-        cv::Mat rgb; cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
-        cv::Mat thumb; cv::resize(rgb, thumb, cv::Size(TARGET_WIDTH, TARGET_HEIGHT), 0, 0, cv::INTER_AREA);
-        GdkPixbuf *pb = pixbuf_from_rgb_mat_copy(thumb);
-        if (!pb) continue;
-        GtkWidget *img = gtk_image_new_from_pixbuf(pb);
-        g_object_unref(pb);
-        GtkWidget *btn = gtk_button_new();
-        gtk_container_add(GTK_CONTAINER(btn), img);
-        ThumbData *td = (ThumbData*)malloc(sizeof(ThumbData));
-        td->frame_index = i; td->dialog = dialog;
-        g_signal_connect(btn, "clicked", G_CALLBACK(on_thumb_clicked), td);
-        gtk_grid_attach(GTK_GRID(grid), btn, c, r, 1, 1);
-        if (++c >= cols) { c = 0; ++r; }
-    }
-    // 还原播放位置
-    g_cap.set(cv::CAP_PROP_POS_FRAMES, saved_pos);
+    // Prepare data for the worker thread
+    ThumbnailThreadData *thread_data = g_new(ThumbnailThreadData, 1);
+    thread_data->grid = grid;
+    thread_data->dialog = dialog;
+    thread_data->video_path = g_video_path;
+    thread_data->total_frames = total;
+    thread_data->current_frame = (int)g_cap.get(cv::CAP_PROP_POS_FRAMES);
+
+    // Spawn the worker thread
+    g_thread_new("thumbnail-worker", thumbnail_worker_thread, thread_data);
 
     gtk_widget_show_all(dialog);
-    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }
 
-static void open_video_clicked(GtkWidget *widget, gpointer data) {
-    GtkWidget *dialog = gtk_file_chooser_dialog_new("选择视频文件", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                   "_取消", GTK_RESPONSE_CANCEL, "_打开", GTK_RESPONSE_ACCEPT, NULL);
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        g_video_path = filename ? filename : "";
-        g_free(filename);
-        if (!g_video_path.empty()) {
-            stop_playback(); // 停止当前播放
-            if (g_cap.isOpened()) g_cap.release();
-            g_cap.open(g_video_path);
-            g_frame_index = 0;
-            if (g_cap.isOpened()) {
-                cv::Mat frame; 
-                if (g_cap.read(frame)) { 
-                    g_frame_index = 1; 
-                    show_cv_frame(frame);
-                    update_progress_bar();
-                } else {
-                    GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                                            GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "无法读取首帧");
-                    gtk_dialog_run(GTK_DIALOG(err)); gtk_widget_destroy(err);
-                }
-            } else {
-                GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                                        GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "无法打开视频");
-                gtk_dialog_run(GTK_DIALOG(err)); gtk_widget_destroy(err);
-            }
-        }
-    }
-    gtk_widget_destroy(dialog);
-}
+// open_video_clicked function was removed and its logic merged into open_media_clicked
 
 static void next_frame_clicked(GtkWidget *widget, gpointer data) {
     if (!g_cap.isOpened()) return;

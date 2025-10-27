@@ -2060,7 +2060,9 @@ CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj: C:/Users/28693/Desktop/S
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_iterator_base_types.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_map.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_multimap.h \
+  C:/msys64/mingw64/include/c++/15.2.0/bits/stl_multiset.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_pair.h \
+  C:/msys64/mingw64/include/c++/15.2.0/bits/stl_set.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_tempbuf.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_tree.h \
   C:/msys64/mingw64/include/c++/15.2.0/bits/stl_uninitialized.h \
@@ -2109,6 +2111,7 @@ CMakeFiles/imageprocessor.dir/src/oscilloscope.cpp.obj: C:/Users/28693/Desktop/S
   C:/msys64/mingw64/include/c++/15.2.0/pstl/execution_defs.h \
   C:/msys64/mingw64/include/c++/15.2.0/pstl/glue_algorithm_defs.h \
   C:/msys64/mingw64/include/c++/15.2.0/pstl/pstl_config.h \
+  C:/msys64/mingw64/include/c++/15.2.0/set \
   C:/msys64/mingw64/include/c++/15.2.0/sstream \
   C:/msys64/mingw64/include/c++/15.2.0/stdexcept \
   C:/msys64/mingw64/include/c++/15.2.0/stdlib.h \

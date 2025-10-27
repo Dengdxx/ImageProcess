@@ -38,9 +38,11 @@ public:
     void updateDisplay(int frame_index);
     
     // 获取窗口指针
-    GtkWidget* getWindow() { return window; }
+        GtkWidget* getWindow() { return window; }
     
-private:
+        void clearAllChannels();
+        
+    private:
     // UI 组件
     GtkWidget *window;
     GtkWidget *drawing_area;        // 绘图区域
@@ -84,7 +86,6 @@ private:
     // 数据处理
     void addChannel(const std::string& variable_name);
     void removeChannel(int channel_index);
-    void clearAllChannels();
     void updateChannelData(int frame_index);
     void refreshDrawing();
     

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <set>
 
 // 定义 M_PI（某些编译器可能没有定义）
 #ifndef M_PI
@@ -249,16 +250,26 @@ bool OscilloscopeWindow::loadCSV(const std::string& filename) {
     if (!csv_reader.loadCSV(filename)) {
         return false;
     }
-    
-    // 获取可用变量列表（CSV + 动态日志）
-    available_vars = csv_reader.getVariableNames();
-    
-    // 添加动态日志变量
+
+    // 清空并重新构建可用变量列表，优先使用动态日志
+    available_vars.clear();
+    std::set<std::string> added_vars; // 使用set来跟踪已添加的纯变量名，以处理重名
+
+    // 1. 优先添加所有动态日志变量
     std::vector<std::string> dynamic_vars = DynamicLogManager::getInstance().getAllVariableNames();
     for (const auto& var : dynamic_vars) {
-        // 检查是否已存在（避免重复）
-        if (std::find(available_vars.begin(), available_vars.end(), var) == available_vars.end()) {
-            available_vars.push_back(var + " [动态]");  // 添加标记区分
+        if (added_vars.find(var) == added_vars.end()) {
+            available_vars.push_back(var + " [动态]");
+            added_vars.insert(var);
+        }
+    }
+
+    // 2. 添加不重名的CSV变量
+    std::vector<std::string> csv_vars = csv_reader.getVariableNames();
+    for (const auto& var : csv_vars) {
+        if (added_vars.find(var) == added_vars.end()) {
+            available_vars.push_back(var);
+            added_vars.insert(var);
         }
     }
     
@@ -282,8 +293,8 @@ bool OscilloscopeWindow::loadCSV(const std::string& filename) {
             // 默认选择第一个
             gtk_combo_box_set_active(GTK_COMBO_BOX(add_channel_combo), 0);
             
-            g_print("[示波器] 成功加载CSV，找到 %zu 个CSV变量 + %zu 个动态变量\n", 
-                    csv_reader.getVariableNames().size(), dynamic_vars.size());
+            g_print("[示波器] 成功加载CSV，找到 %zu 个可用变量 (%zu 动态, %zu CSV)\n", 
+                    available_vars.size(), dynamic_vars.size(), csv_vars.size());
         }
     }
     
