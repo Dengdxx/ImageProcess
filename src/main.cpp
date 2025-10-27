@@ -100,8 +100,6 @@ static void reset_button_clicked(GtkWidget *widget, gpointer data);
 
 // Thumbnail generation functions
 static void on_thumb_clicked(GtkWidget *widget, gpointer user_data);
-gboolean add_thumbnail_ui(gpointer user_data);
-gpointer thumbnail_worker_thread(gpointer data);
 #endif
 
 // 全局重置函数 - 通过重启进程实现
@@ -964,94 +962,7 @@ static void show_cv_frame_OLD(const cv::Mat &frame) {
 
 typedef struct ThumbData { int frame_index; GtkWidget *dialog; } ThumbData;
 
-// Structure to pass data to the thumbnail worker thread
-typedef struct {
-    GtkWidget *grid;
-    GtkWidget *dialog;
-    std::string video_path;
-    int total_frames;
-    int current_frame;
-} ThumbnailThreadData;
 
-// Structure to pass data from the worker thread to the UI thread
-typedef struct {
-    GtkWidget *grid;
-    GtkWidget *dialog;
-    GdkPixbuf *pixbuf;
-    int frame_index;
-    int col;
-    int row;
-} ThumbnailUpdateData;
-
-// UI update function, runs in the main GTK thread
-gboolean add_thumbnail_ui(gpointer user_data) {
-    ThumbnailUpdateData *update_data = (ThumbnailUpdateData *)user_data;
-
-    GtkWidget *img = gtk_image_new_from_pixbuf(update_data->pixbuf);
-    g_object_unref(update_data->pixbuf); // The image now holds a reference
-
-    GtkWidget *btn = gtk_button_new();
-    gtk_container_add(GTK_CONTAINER(btn), img);
-
-    ThumbData *td = (ThumbData*)malloc(sizeof(ThumbData));
-    td->frame_index = update_data->frame_index;
-    td->dialog = update_data->dialog;
-    g_signal_connect(btn, "clicked", G_CALLBACK(on_thumb_clicked), td);
-
-    gtk_grid_attach(GTK_GRID(update_data->grid), btn, update_data->col, update_data->row, 1, 1);
-    gtk_widget_show(btn); // Show the button as it's added
-
-    g_free(update_data);
-    return G_SOURCE_REMOVE;
-}
-
-// Background worker thread function
-gpointer thumbnail_worker_thread(gpointer data) {
-    ThumbnailThreadData *thread_data = (ThumbnailThreadData *)data;
-
-    cv::VideoCapture cap;
-    cap.open(thread_data->video_path);
-    if (!cap.isOpened()) {
-        g_free(thread_data);
-        return NULL;
-    }
-
-    const int maxThumbs = 200;
-    int step = thread_data->total_frames / maxThumbs; 
-    if (step < 1) step = 1;
-
-    const int cols = 6;
-    int r = 0, c = 0;
-
-    for (int i = 0; i < thread_data->total_frames; i += step) {
-        cap.set(cv::CAP_PROP_POS_FRAMES, i);
-        cv::Mat frame;
-        if (!cap.read(frame)) break;
-
-        cv::Mat rgb, thumb;
-        cv::cvtColor(frame, rgb, cv::COLOR_BGR2RGB);
-        cv::resize(rgb, thumb, cv::Size(TARGET_WIDTH, TARGET_HEIGHT), 0, 0, cv::INTER_AREA);
-        GdkPixbuf *pb = pixbuf_from_rgb_mat_copy(thumb);
-        if (!pb) continue;
-
-        // Prepare data for UI update and invoke it on the main thread
-        ThumbnailUpdateData *update_data = g_new(ThumbnailUpdateData, 1);
-        update_data->grid = thread_data->grid;
-        update_data->dialog = thread_data->dialog;
-        update_data->pixbuf = pb; // Pass the pixbuf, UI thread will unref
-        update_data->frame_index = i;
-        update_data->col = c;
-        update_data->row = r;
-
-        g_main_context_invoke(NULL, add_thumbnail_ui, update_data);
-
-        if (++c >= cols) { c = 0; ++r; }
-    }
-
-    cap.release();
-    g_free(thread_data);
-    return NULL;
-}
 
 static void on_thumb_clicked(GtkWidget *widget, gpointer user_data)
 {
@@ -1068,7 +979,7 @@ static void on_thumb_clicked(GtkWidget *widget, gpointer user_data)
         }
     }
     if (td->dialog) gtk_widget_destroy(td->dialog);
-    // Do not free td here, it's freed by GTK's object destruction process
+    free(td);
 }
 
 static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
@@ -1081,15 +992,17 @@ static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
     
     stop_playback(); // 停止播放
 
+    // 获取总帧数与采样步长
     int total = (int)g_cap.get(cv::CAP_PROP_FRAME_COUNT);
     if (total <= 0) total = 3000; // 某些容器不返回帧数
+    const int maxThumbs = 200; // 限制最大缩略图数，避免内存与等待时间过大
+    int step = total / maxThumbs; if (step < 1) step = 1;
 
-    GtkWidget *dialog = gtk_dialog_new_with_buttons("选择帧 (加载中...)", GTK_WINDOW(window), GTK_DIALOG_MODAL,
+    GtkWidget *dialog = gtk_dialog_new_with_buttons("选择帧", GTK_WINDOW(window), GTK_DIALOG_MODAL,
                                                     "关闭", GTK_RESPONSE_CLOSE, NULL);
-    gtk_window_set_default_size(GTK_WINDOW(dialog), 1400, 900);
-    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
-    
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 1400, 900);  // 设置默认窗口大小
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);  // 居中显示
+
     GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -1100,18 +1013,34 @@ static void open_tiled_selector_clicked(GtkWidget *widget, gpointer data)
     gtk_grid_set_column_spacing(GTK_GRID(grid), 6);
     gtk_container_add(GTK_CONTAINER(scroll), grid);
 
-    // Prepare data for the worker thread
-    ThumbnailThreadData *thread_data = g_new(ThumbnailThreadData, 1);
-    thread_data->grid = grid;
-    thread_data->dialog = dialog;
-    thread_data->video_path = g_video_path;
-    thread_data->total_frames = total;
-    thread_data->current_frame = (int)g_cap.get(cv::CAP_PROP_POS_FRAMES);
-
-    // Spawn the worker thread
-    g_thread_new("thumbnail-worker", thumbnail_worker_thread, thread_data);
+    // 生成缩略图
+    const int cols = 6; // 每行几列
+    int r = 0, c = 0;
+    double saved_pos = g_cap.get(cv::CAP_PROP_POS_FRAMES);
+    for (int i = 0; i < total; i += step) {
+        g_cap.set(cv::CAP_PROP_POS_FRAMES, i);
+        cv::Mat frame; if (!g_cap.read(frame)) break;
+        cv::Mat bgr = (frame.channels()==3) ? frame : (cv::Mat)cv::Mat();
+        if (frame.channels()!=3) cv::cvtColor(frame, bgr, cv::COLOR_GRAY2BGR);
+        cv::Mat rgb; cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
+        cv::Mat thumb; cv::resize(rgb, thumb, cv::Size(TARGET_WIDTH, TARGET_HEIGHT), 0, 0, cv::INTER_AREA);
+        GdkPixbuf *pb = pixbuf_from_rgb_mat_copy(thumb);
+        if (!pb) continue;
+        GtkWidget *img = gtk_image_new_from_pixbuf(pb);
+        g_object_unref(pb);
+        GtkWidget *btn = gtk_button_new();
+        gtk_container_add(GTK_CONTAINER(btn), img);
+        ThumbData *td = (ThumbData*)malloc(sizeof(ThumbData));
+        td->frame_index = i; td->dialog = dialog;
+        g_signal_connect(btn, "clicked", G_CALLBACK(on_thumb_clicked), td);
+        gtk_grid_attach(GTK_GRID(grid), btn, c, r, 1, 1);
+        if (++c >= cols) { c = 0; ++r; }
+    }
+    // 还原播放位置
+    g_cap.set(cv::CAP_PROP_POS_FRAMES, saved_pos);
 
     gtk_widget_show_all(dialog);
+    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
 }
 
 // open_video_clicked function was removed and its logic merged into open_media_clicked
