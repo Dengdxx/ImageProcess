@@ -679,7 +679,7 @@ void draw_edge()
  * @param start_pos    可选：从输入序列的第几个位置开始匹配，默认传0从头开始
  *
  * @return match_result_t 结构体, 包含匹配状态和置信度
- * @note result.start 和 result.end 返回的是匹配在整个input数组中的起始和结束索引（不是相对于start_pos）
+ * @note result.start 和 result.end 返回的是匹配在整个input数组中的起始和结束索引（不是相对于start_pos） 永远有start<end 不论匹配顺序
  */
 match_result match_strict_sequence_with_gaps(
     const uint16_t* input,     // 输入序列
@@ -1146,15 +1146,15 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	if((left_straight!=0)&&result_cr.matched)
 	{
 		first_corner=1;
-		firstcorner_pos[0]=points_r[result_cr.end][0];// x
-		firstcorner_pos[1]=image_h-1-points_r[result_cr.end][1];// y
+		firstcorner_pos[0]=points_r[result_cr.start][0];// x
+		firstcorner_pos[1]=image_h-1-points_r[result_cr.start][1];// y
 		// 右环
 	}
 	else if((right_straight!=0)&&result_cl.matched)
 	{
 		first_corner=2;
-	    firstcorner_pos[0]=points_l[result_cl.end][0];// x
-		firstcorner_pos[1]=image_h-1-points_l[result_cl.end][1];// y
+	    firstcorner_pos[0]=points_l[result_cl.start][0];// x
+		firstcorner_pos[1]=image_h-1-points_l[result_cl.start][1];// y
 		// 左环
 	}
 	else
