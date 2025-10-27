@@ -33,6 +33,7 @@ add_library(image_internal STATIC
     ${SRC_DIR}/morph_binary_bitpacked.c
     ${SRC_DIR}/dynamic_log.cpp
     ${SRC_DIR}/utils.cpp
+    ${SRC_DIR}/kalman.c
 )
 target_include_directories(image_internal PUBLIC ${SRC_DIR})
 

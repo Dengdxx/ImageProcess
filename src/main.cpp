@@ -634,8 +634,12 @@ static GdkPixbuf* render_imo_array_pixbuf(uint8_t arr[IMAGE_H][IMAGE_W], int w, 
                 case 2: color = 0xffffa500; break;
                 case 3: color = 0xffffff00; break;
                 case 4: color = 0xff00ff00; break;
-                case 5: color = 0xff00ffff; break;
-                case 255: default: color = 0xffffffff; break;
+                case 5: color = 0xff00ffff; break; // 青色
+                case 6: color = 0xffff00ff; break; // 洋红色
+                case 7: color = 0xff0000ff; break; // 蓝色
+                case 8: color = 0xff800080; break; // 紫色
+                case 9: color = 0xffffc0cb; break; // 粉色
+                case 255: default: color = 0xffffffff; break; // 白色
             }
             for (int dy = 0; dy < pixel_size; ++dy)
                 for (int dx = 0; dx < pixel_size; ++dx) {

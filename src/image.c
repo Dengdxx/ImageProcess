@@ -6,6 +6,31 @@
 #include "morph_binary_bitpacked.h"
 #include "global_image_buffer.h"
 #include "dynamic_log.h"
+#include "kalman.h"
+
+// ---- Kalman Filter for firstcorner_pos ----
+static KalmanFilter kf_firstcorner;
+static int kf_firstcorner_initialized = 0;
+static int kf_firstcorner_loss_count = 0; // 连续丢失帧数计数器
+#define KALMAN_MAX_LOSS_FRAMES 5 // 禁用卡尔曼滤波器的连续丢失帧数阈值
+uint8_t firstcorner_pos[2]={0,0};
+uint8_t firstcorner_pos_filtered[2] = {0, 0}; // 滤波后的位置 [x, y]
+// -----------------------------------------
+
+// --- IMO 数组颜色映射说明 ---
+// imo 数组中的特定值在 GUI 中会被渲染成不同的颜色，用于可视化。
+// 0: 黑色 (Black)
+// 1: 红色 (Red) - 用于左边界点
+// 2: 橙色 (Orange) - 用于右边界点
+// 3: 黄色 (Yellow) - 用于中线
+// 4: 绿色 (Green) - 用于左边界
+// 5: 青色 (Cyan) - 用于右边界
+// 6: 洋红色 (Magenta)
+// 7: 蓝色 (Blue)
+// 8: 紫色 (Purple)
+// 9: 粉色 (Pink)
+// 255: 白色 (White) - 默认背景或赛道内部
+// -----------------------------------------
 
 // ---- 桌面环境桩：移除嵌入式依赖，提供最小可编译实现 ----
 // 若在嵌入式环境下已有这些外部符号，可在编译时定义以下宏以禁用本文件的桩：
@@ -608,11 +633,33 @@ void draw_edge()
     // 显示中线
     for (int row = 0; row < image_h; row++) {
 		// 这里y索引要颠倒 因为最终左、右、中线是从底部向上 而imo是从顶部向下
-        imo[image_h-row][center_line[row]] = 3;
-		imo[image_h-row][l_border[row]] = 4;
-		imo[image_h-row][r_border[row]] = 5;
+        imo[image_h-1-row][center_line[row]] = 3;
+		imo[image_h-1-row][l_border[row]] = 4;
+		imo[image_h-1-row][r_border[row]] = 5;
 
     }
+	// 显示拐点及其周围的3x3区域
+	for(int i=0;i<9;i++)
+	{
+		imo[image_h-firstcorner_pos[1]][firstcorner_pos[0]] = 6;
+		imo[image_h-1-firstcorner_pos[1]][firstcorner_pos[0]] = 6;
+		imo[image_h-2-firstcorner_pos[1]][firstcorner_pos[0]] = 6;
+	    imo[image_h-firstcorner_pos[1]][firstcorner_pos[0]+1] = 6;
+		imo[image_h-1-firstcorner_pos[1]][firstcorner_pos[0]+1] = 6;
+		imo[image_h-2-firstcorner_pos[1]][firstcorner_pos[0]+1] = 6;
+        imo[image_h-firstcorner_pos[1]][firstcorner_pos[0]-1] = 6;
+		imo[image_h-1-firstcorner_pos[1]][firstcorner_pos[0]-1] = 6;
+		imo[image_h-2-firstcorner_pos[1]][firstcorner_pos[0]-1] = 6;
+	    imo[image_h-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]] = 7;
+		imo[image_h-1-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]] = 7;
+		imo[image_h-2-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]] = 7;
+	    imo[image_h-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]+1] = 7;
+		imo[image_h-1-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]+1] = 7;
+		imo[image_h-2-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]+1] = 7;
+        imo[image_h-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]-1] = 7;
+		imo[image_h-1-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]-1] = 7;
+		imo[image_h-2-firstcorner_pos_filtered[1]][firstcorner_pos_filtered[0]-1] = 7;
+	}
 }
 
 
@@ -1038,6 +1085,7 @@ void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,ui
 //环岛检测函数
 uint8_t island_flag=0;
 uint8_t first_corner=0;
+//uint8_t firstcorner_pos[2]={0,0};//记录第一个角点位置 行列 写在顶部了
 void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
 	uint16_t match_start_l=total_num_l-1,match_start_r=total_num_r-1;
@@ -1098,13 +1146,70 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	if((left_straight!=0)&&result_cr.matched)
 	{
 		first_corner=1;
+		firstcorner_pos[0]=points_r[result_cr.end][0];// x
+		firstcorner_pos[1]=image_h-1-points_r[result_cr.end][1];// y
 		// 右环
 	}
 	else if((right_straight!=0)&&result_cl.matched)
 	{
 		first_corner=2;
+	    firstcorner_pos[0]=points_l[result_cl.end][0];// x
+		firstcorner_pos[1]=image_h-1-points_l[result_cl.end][1];// y
 		// 左环
 	}
+	else
+	{
+		first_corner=0;
+		firstcorner_pos[0]=0;
+		firstcorner_pos[1]=0;
+	}
+	log_add_uint8("横firstcorner_pos", firstcorner_pos[0], -1);
+	log_add_uint8("纵firstcorner_pos", firstcorner_pos[1], -1);
+
+    // --- 卡尔曼滤波器集成 ---
+    if (first_corner != 0) { // 仅当检测到角点时更新卡尔曼滤波器
+        float current_measurement[2] = {(float)firstcorner_pos[0], (float)firstcorner_pos[1]};
+
+        if (!kf_firstcorner_initialized) {
+            // 使用第一个有效测量值初始化卡尔曼滤波器
+            // 过程噪声 (Q) 和测量噪声 (R) 是可调参数。
+            // dt 暂时设为 1.0，表示一个帧间隔。
+            // 如果帧率可变，dt 应动态计算。
+            kalman_init(&kf_firstcorner, current_measurement[0], current_measurement[1], 0.1f, 10.0f);
+            kf_firstcorner_initialized = 1;
+        } else {
+            kalman_predict(&kf_firstcorner, 1.0f); // dt = 1.0f (一个帧间隔)
+            kalman_update(&kf_firstcorner, current_measurement);
+        }
+        // 存储滤波后的位置
+        firstcorner_pos_filtered[0] = (uint8_t)kf_firstcorner.x[0];
+        firstcorner_pos_filtered[1] = (uint8_t)kf_firstcorner.x[1];
+        kf_firstcorner_loss_count = 0; // 成功检测到时重置丢失计数
+    } else { // 未检测到角点
+        if (kf_firstcorner_initialized) {
+            kf_firstcorner_loss_count++;
+            if (kf_firstcorner_loss_count < KALMAN_MAX_LOSS_FRAMES) {
+                // 在丢失阈值内继续预测
+                kalman_predict(&kf_firstcorner, 1.0f);
+                firstcorner_pos_filtered[0] = (uint8_t)kf_firstcorner.x[0];
+                firstcorner_pos_filtered[1] = (uint8_t)kf_firstcorner.x[1];
+            } else {
+                // 超过丢失阈值，禁用滤波器
+                kf_firstcorner_initialized = 0;
+                kf_firstcorner_loss_count = 0; // 重置计数
+                firstcorner_pos_filtered[0] = 0u; // 重置滤波后的位置
+                firstcorner_pos_filtered[1] = 0u;
+            }
+        } else {
+            // 滤波器未初始化或已禁用，重置滤波后的位置
+            firstcorner_pos_filtered[0] = 0u;
+            firstcorner_pos_filtered[1] = 0u;
+        }
+    }
+    // --- 卡尔曼滤波器集成结束 ---
+
+	log_add_uint8("横firstcorner_pos_filtered", firstcorner_pos_filtered[0], -1);
+	log_add_uint8("纵firstcorner_pos_filtered", firstcorner_pos_filtered[1], -1);
     log_add_uint8("result_cl.matched",result_cl.matched,-1);
 	log_add_float("result_cl.confidence",result_cl.confidence,-1);
 	log_add_uint8("result_cr.matched",result_cr.matched,-1);

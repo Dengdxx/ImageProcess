@@ -57,6 +57,7 @@ extern match_result match_strict_sequence_with_gaps_u8(
 extern uint8_t l_border[image_h];//左线数组
 extern uint8_t r_border[image_h];//右线数组
 extern uint8_t center_line[image_h];//中线数组
+extern uint8_t firstcorner_pos_filtered[2]; // 卡尔曼滤波后的拐角坐标
 
 #endif /*_IMAGE_H*/
 

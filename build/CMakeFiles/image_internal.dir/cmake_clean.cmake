@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/image_internal.dir/src/global_image_buffer.c.obj.d"
   "CMakeFiles/image_internal.dir/src/image.c.obj"
   "CMakeFiles/image_internal.dir/src/image.c.obj.d"
+  "CMakeFiles/image_internal.dir/src/kalman.c.obj"
+  "CMakeFiles/image_internal.dir/src/kalman.c.obj.d"
   "CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj"
   "CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj.d"
   "CMakeFiles/image_internal.dir/src/utils.cpp.obj"

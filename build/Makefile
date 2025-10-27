@@ -259,6 +259,30 @@ src/image.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/image.c.s
 .PHONY : src/image.c.s
 
+src/kalman.obj: src/kalman.c.obj
+.PHONY : src/kalman.obj
+
+# target to build an object file
+src/kalman.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/kalman.c.obj
+.PHONY : src/kalman.c.obj
+
+src/kalman.i: src/kalman.c.i
+.PHONY : src/kalman.i
+
+# target to preprocess a source file
+src/kalman.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/kalman.c.i
+.PHONY : src/kalman.c.i
+
+src/kalman.s: src/kalman.c.s
+.PHONY : src/kalman.s
+
+# target to generate assembly for a file
+src/kalman.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/kalman.c.s
+.PHONY : src/kalman.c.s
+
 src/main.obj: src/main.cpp.obj
 .PHONY : src/main.obj
 
@@ -435,6 +459,9 @@ help:
 	@echo ... src/image.obj
 	@echo ... src/image.i
 	@echo ... src/image.s
+	@echo ... src/kalman.obj
+	@echo ... src/kalman.i
+	@echo ... src/kalman.s
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s
