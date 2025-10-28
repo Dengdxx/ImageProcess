@@ -264,10 +264,10 @@ void precise_edge_detection_bitpacked(const uint32_t* RESTRICT src_bits,
                                       int width, int height) {
     // 开运算：先腐蚀（去小噪点）再膨胀（恢复主体形状）
     erode3x3_bitpacked(src_bits, tmp1_bits, width, height);
-    dilate3x3_bitpacked(tmp1_bits, src_bits, width, height);
+    dilate3x3_bitpacked(tmp1_bits, out_bits, width, height);
 
     // 闭运算：先膨胀（填小孔/断裂）再腐蚀（恢复边界）
-    dilate3x3_bitpacked(src_bits, tmp1_bits, width, height);
+    dilate3x3_bitpacked(out_bits, tmp1_bits, width, height);
     erode3x3_bitpacked(tmp1_bits, out_bits, width, height); // out_bits 变为“干净图像”
 
     // 内部梯度：clean - erode(clean)（二值下等价 AND NOT）
