@@ -1,5 +1,5 @@
-/home/dx/桌面/ImageProcess/build/CMakeFiles/image_internal.dir
-/home/dx/桌面/ImageProcess/build/CMakeFiles/imageprocessor.dir
-/home/dx/桌面/ImageProcess/build/CMakeFiles/video_processor.dir
-/home/dx/桌面/ImageProcess/build/CMakeFiles/edit_cache.dir
-/home/dx/桌面/ImageProcess/build/CMakeFiles/rebuild_cache.dir
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/build/CMakeFiles/image_internal.dir
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/build/CMakeFiles/imageprocessor.dir
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/build/CMakeFiles/video_processor.dir
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/build/CMakeFiles/edit_cache.dir
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/build/CMakeFiles/rebuild_cache.dir
