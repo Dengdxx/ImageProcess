@@ -98,6 +98,7 @@ static void update_progress_bar();
 static void load_log_csv_clicked(GtkWidget *widget, gpointer data);
 static void update_log_display(int frame_index);
 static void open_oscilloscope_clicked(GtkWidget *widget, gpointer data);
+static void save_dynamic_log_clicked(GtkWidget *widget, gpointer data);
 static void reset_button_clicked(GtkWidget *widget, gpointer data);
 
 // Thumbnail generation functions
@@ -142,6 +143,21 @@ int main(int argc, char **argv) {
     app = gtk_application_new("com.example.binaryimage", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(app), argc, argv);
+
+    // 退出前，保存动态日志
+    // 如果在临时模式下（未指定CSV），则自动创建文件名
+    if (g_csv_file_path.empty() && !g_video_path.empty()) {
+        std::string save_path;
+        size_t dot_pos = g_video_path.find_last_of(".");
+        if (dot_pos != std::string::npos) {
+            save_path = g_video_path.substr(0, dot_pos) + "_logs.csv";
+        } else {
+            save_path = g_video_path + "_logs.csv";
+        }
+        log_set_csv_path(save_path.c_str());
+    }
+    log_flush_to_csv(); // 如果路径已设置，则刷新
+
     g_object_unref(app);
 
     free_binary_image_data();
@@ -180,6 +196,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *oscilloscope_btn = gtk_button_new_with_label("📊 示波器");
     gtk_box_pack_start(GTK_BOX(hbox), oscilloscope_btn, FALSE, FALSE, 0);
     g_signal_connect(oscilloscope_btn, "clicked", G_CALLBACK(open_oscilloscope_clicked), NULL);
+
+    GtkWidget *save_log_btn = gtk_button_new_with_label("保存动态日志");
+    gtk_box_pack_start(GTK_BOX(hbox), save_log_btn, FALSE, FALSE, 0);
+    g_signal_connect(save_log_btn, "clicked", G_CALLBACK(save_dynamic_log_clicked), NULL);
 
     GtkWidget *prev_btn = gtk_button_new_with_label("上一帧");
     gtk_box_pack_start(GTK_BOX(hbox), prev_btn, FALSE, FALSE, 0);
@@ -542,19 +562,46 @@ static void open_media_clicked(GtkWidget *widget, gpointer data) {
                 }
             #ifdef HAVE_OPENCV
             } else if (ext == "mp4") {
-                // 当加载新视频时，重置所有与旧日志/CSV相关的状态
+                // 1. 清理旧状态
+                stop_playback();
                 g_csv_reader.clear();
                 DynamicLogManager::getInstance().clearAll();
                 if (g_oscilloscope) {
                     g_oscilloscope->clearAllChannels();
                 }
-                if (g_log_buffer) {
-                    gtk_text_buffer_set_text(g_log_buffer, "(新视频已加载, 请加载对应CSV)", -1);
-                }
                 g_csv_file_path.clear();
 
+                // 2. 设置视频路径
                 g_video_path = filename;
-                stop_playback();
+
+                // 3. 自动确定并准备对应的CSV路径（无论是否存在）
+                std::string potential_csv_path;
+                size_t dot_pos = filename.find_last_of(".");
+                if (dot_pos != std::string::npos) {
+                    potential_csv_path = filename.substr(0, dot_pos) + "_logs.csv";
+                } else {
+                    potential_csv_path = filename + "_logs.csv";
+                }
+
+                // 4. 立即“挂载”此CSV路径
+                g_csv_file_path = potential_csv_path;
+                log_set_csv_path(g_csv_file_path.c_str());
+
+                // 5. 尝试加载，如果文件不存在，则g_csv_reader会变为空状态
+                bool csv_existed = g_csv_reader.loadCSV(g_csv_file_path);
+
+                // 6. 更新UI提示
+                if (g_log_buffer) {
+                    std::string msg;
+                    if (csv_existed) {
+                        msg = "自动加载日志: \n" + g_csv_file_path;
+                    } else {
+                        msg = "临时模式已启动。\n日志将自动保存到: \n" + g_csv_file_path;
+                    }
+                    gtk_text_buffer_set_text(g_log_buffer, msg.c_str(), -1);
+                }
+
+                // 7. 加载视频
                 if (g_cap.isOpened()) g_cap.release();
                 g_cap.open(g_video_path);
                 g_frame_index = 0;
@@ -575,6 +622,12 @@ static void open_media_clicked(GtkWidget *widget, gpointer data) {
                                                             GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "无法打开视频文件。");
                     gtk_dialog_run(GTK_DIALOG(err));
                     gtk_widget_destroy(err);
+                }
+
+                // 8. 如果示波器已打开，立即用新数据源更新它
+                if (g_oscilloscope) {
+                    g_oscilloscope->loadCSV(g_csv_file_path);
+                    g_oscilloscope->updateDisplay(g_frame_index);
                 }
             #endif
             } else {
@@ -927,20 +980,53 @@ static void open_oscilloscope_clicked(GtkWidget *widget, gpointer data) {
     
     g_oscilloscope->show();
     
-    // 如果已经加载了CSV，自动加载到示波器
-    if (!g_csv_file_path.empty() && g_csv_reader.getRecordCount() > 0) {
-        g_oscilloscope->loadCSV(g_csv_file_path);
-        g_oscilloscope->updateDisplay(g_frame_index);
-    } else {
-        // 提示用户先加载CSV
-        GtkWidget *info = gtk_message_dialog_new(GTK_WINDOW(window),
-                                                  GTK_DIALOG_MODAL,
-                                                  GTK_MESSAGE_INFO,
-                                                  GTK_BUTTONS_OK,
-                                                  "提示\n\n请先点击\"加载日志CSV\"按钮\n加载包含数值变量的CSV文件");
-        gtk_dialog_run(GTK_DIALOG(info));
-        gtk_widget_destroy(info);
+    // 总是尝试加载，让loadCSV内部处理CSV不存在但动态日志存在的情况
+    g_oscilloscope->loadCSV(g_csv_file_path);
+    g_oscilloscope->updateDisplay(g_frame_index);
+}
+
+// 保存动态日志到CSV
+static void save_dynamic_log_clicked(GtkWidget *widget, gpointer data) {
+    std::string save_path = g_csv_file_path;
+
+    // 如果没有加载CSV（临时模式），则根据视频文件名创建日志文件名
+    if (save_path.empty()) {
+        if (g_video_path.empty()) {
+            GtkWidget *err = gtk_message_dialog_new(GTK_WINDOW(window), 
+                                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                     GTK_MESSAGE_ERROR, 
+                                                     GTK_BUTTONS_CLOSE,
+                                                     "错误\n\n请先加载视频或CSV文件，以确定保存路径");
+            gtk_dialog_run(GTK_DIALOG(err));
+            gtk_widget_destroy(err);
+            return;
+        }
+
+        // 从视频路径生成日志路径
+        size_t dot_pos = g_video_path.find_last_of(".");
+        if (dot_pos != std::string::npos) {
+            save_path = g_video_path.substr(0, dot_pos) + "_logs.csv";
+        } else {
+            save_path = g_video_path + "_logs.csv";
+        }
+
+        // 更新全局CSV路径，以便下次保存和退出时使用
+        g_csv_file_path = save_path;
+        log_set_csv_path(g_csv_file_path.c_str());
     }
+
+    // 保存日志
+    log_flush_to_csv();
+
+    // 显示成功信息
+    GtkWidget *info = gtk_message_dialog_new(GTK_WINDOW(window),
+                                              GTK_DIALOG_MODAL,
+                                              GTK_MESSAGE_INFO,
+                                              GTK_BUTTONS_OK,
+                                              "成功\n\n动态日志已保存到:\n%s",
+                                              g_csv_file_path.c_str());
+    gtk_dialog_run(GTK_DIALOG(info));
+    gtk_widget_destroy(info);
 }
 
 static void show_cv_frame_OLD(const cv::Mat &frame) {

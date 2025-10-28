@@ -164,23 +164,6 @@ GtkWidget* OscilloscopeWindow::buildChannelPanel() {
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 10);
     gtk_container_add(GTK_CONTAINER(frame), vbox);
     
-    // 提示信息
-    GtkWidget *hint_label = gtk_label_new("提示：请先在主窗口加载CSV文件");
-    gtk_label_set_line_wrap(GTK_LABEL(hint_label), TRUE);
-    gtk_widget_set_size_request(hint_label, 230, -1);
-    
-    // 设置提示文字样式（使用CSS）
-    GtkCssProvider *hint_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(hint_provider,
-        "label { color: #888888; font-size: 9pt; }", -1, NULL);
-    gtk_style_context_add_provider(
-        gtk_widget_get_style_context(hint_label),
-        GTK_STYLE_PROVIDER(hint_provider),
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    g_object_unref(hint_provider);
-    
-    gtk_box_pack_start(GTK_BOX(vbox), hint_label, FALSE, FALSE, 5);
-    
     // 添加通道区域
     GtkWidget *add_label = gtk_label_new("选择变量添加通道:");
     gtk_box_pack_start(GTK_BOX(vbox), add_label, FALSE, FALSE, 0);
@@ -247,9 +230,7 @@ GtkWidget* OscilloscopeWindow::buildChannelPanel() {
 
 // 加载CSV数据
 bool OscilloscopeWindow::loadCSV(const std::string& filename) {
-    if (!csv_reader.loadCSV(filename)) {
-        return false;
-    }
+    bool csv_loaded = csv_reader.loadCSV(filename);
 
     // 清空并重新构建可用变量列表，优先使用动态日志
     available_vars.clear();
@@ -264,12 +245,15 @@ bool OscilloscopeWindow::loadCSV(const std::string& filename) {
         }
     }
 
-    // 2. 添加不重名的CSV变量
-    std::vector<std::string> csv_vars = csv_reader.getVariableNames();
-    for (const auto& var : csv_vars) {
-        if (added_vars.find(var) == added_vars.end()) {
-            available_vars.push_back(var);
-            added_vars.insert(var);
+    // 2. 如果CSV加载成功，添加不重名的CSV变量
+    std::vector<std::string> csv_vars;
+    if (csv_loaded) {
+        csv_vars = csv_reader.getVariableNames();
+        for (const auto& var : csv_vars) {
+            if (added_vars.find(var) == added_vars.end()) {
+                available_vars.push_back(var);
+                added_vars.insert(var);
+            }
         }
     }
     
@@ -280,10 +264,14 @@ bool OscilloscopeWindow::loadCSV(const std::string& filename) {
         
         if (available_vars.empty()) {
             // 如果没有变量，显示提示
-            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(add_channel_combo), "(CSV中没有数值变量)");
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(add_channel_combo), "(无可用变量)");
             gtk_combo_box_set_active(GTK_COMBO_BOX(add_channel_combo), 0);
             
-            g_print("[示波器] CSV中没有找到数值变量\n");
+            if (!csv_loaded) {
+                g_print("[示波器] 未加载CSV，也没有动态日志变量\n");
+            } else {
+                g_print("[示波器] CSV中没有找到数值变量\n");
+            }
         } else {
             // 添加所有可用变量
             for (const auto& var : available_vars) {
@@ -293,12 +281,16 @@ bool OscilloscopeWindow::loadCSV(const std::string& filename) {
             // 默认选择第一个
             gtk_combo_box_set_active(GTK_COMBO_BOX(add_channel_combo), 0);
             
-            g_print("[示波器] 成功加载CSV，找到 %zu 个可用变量 (%zu 动态, %zu CSV)\n", 
-                    available_vars.size(), dynamic_vars.size(), csv_vars.size());
+            if (csv_loaded) {
+                g_print("[示波器] 成功加载CSV，找到 %zu 个可用变量 (%zu 动态, %zu CSV)\n", 
+                        available_vars.size(), dynamic_vars.size(), csv_vars.size());
+            } else {
+                g_print("[示波器] 临时模式，找到 %zu 个动态日志变量\n", available_vars.size());
+            }
         }
     }
     
-    return true;
+    return !available_vars.empty();
 }
 
 // 添加通道
