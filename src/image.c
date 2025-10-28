@@ -933,7 +933,7 @@ growth_array arr = {
     .outer = {1,1,1,1,1,1},
 	.up_inner={4,4,4,4,4,4},
     .inner = {5,5,5,5,5,5},       
-    .corner2 = {2,1,1,1}
+    .corner1 = {4,3,2,1,1,1}
 };
 
 /** 
@@ -1075,12 +1075,14 @@ void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,ui
 	right_straight=0;
 	left_straight=0;
 	straight=0;
-	float left_variance = calculate_border_variance(start_l, end_l, l);//至少要减去2行 因为顶行全黑无意义 次一行因为别的逻辑必定丢线 亦无意义
+	float left_variance = calculate_border_variance(start_l, end_l, l);
 	float right_variance = calculate_border_variance(start_r, end_r, r);
+	log_add_float("left_variance", left_variance, -1);
+	log_add_float("right_variance", right_variance, -1);
 
 	// 这里留了一个不那么严格的直线判断标准 值为2
-	left_straight = (left_variance < 10.0f)?1u:(left_variance < 40.0f?2u:0u);
-	right_straight = (right_variance < 10.0f)?1u:(right_variance < 40.0f?2u:0u);
+	left_straight = (left_variance < 10.0f)?1u:(left_variance < 50.0f?2u:0u);
+	right_straight = (right_variance < 10.0f)?1u:(right_variance < 50.0f?2u:0u);
 	straight = left_straight && right_straight;
 }
 
@@ -1128,7 +1130,7 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 		if(points_l[i][1] <= target_y)
 			break;
 	}
-	result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner2, 4, 2, match_start_l, -1);
+	result_cl = match_strict_sequence_with_gaps(dir_l, total_num_l, arr.corner1, 6, 4, match_start_l, -1);
     }
 
 	//中部右丢左不丢 检测右第一角点
@@ -1148,7 +1150,7 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 		if(points_r[i][1] <= target_y)
 			break;
 	}
-	result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner2, 4, 2, match_start_r, -1);
+	result_cr = match_strict_sequence_with_gaps(dir_r, total_num_r, arr.corner1, 6, 4, match_start_r, -1);
     }
 
 	if((left_straight!=0)&&result_cr.matched)
@@ -1300,7 +1302,7 @@ if (get_start_point(image_h - 3)||get_start_point(image_h - 5)||get_start_point(
 	get_right(data_stastics_r);
 	//处理函数放这里 不要放到if外面
     cross_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);//十字检测
-	straight_detect(l_border, r_border, last_left_lost_down, last_right_lost_down, last_left_lost_up, last_right_lost_up);//直线检测
+	straight_detect(l_border, r_border, last_left_lost_down, last_right_lost_down, last_left_lost_up-3, last_right_lost_up-3);//直线检测 这里去掉顶部三行 因为有时左右线在右侧相交 左border会异常
 	firstcorner_detect(data_stastics_l, data_stastics_r, dir_l, dir_r, points_l, points_r);
 }
     //求中线
