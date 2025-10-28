@@ -10,7 +10,7 @@
 #include "oscilloscope.h"
 #include "dynamic_log.h"
 
-#ifdef HAVE_OPENCV
+#if defined(HAVE_OPENCV) && (defined(__MINGW32__) || defined(__MINGW64__))
 // 兼容 MSYS2 mingw64 (msvcrt) 缺少 quick_exit/timespec_get 的环境：
 // 仅做前置声明以满足 <cstdlib>/<ctime> 中的 using 声明，代码中不实际调用这些符号。
 extern "C" {
@@ -18,6 +18,7 @@ extern "C" {
     int at_quick_exit(void (*)(void));
     struct timespec; int timespec_get(struct timespec*, int);
 }
+#elif defined(HAVE_OPENCV)
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>

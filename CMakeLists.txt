@@ -18,7 +18,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/install/lib")
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 
 # 选项：是否构建 GTK 图形界面（默认 OFF，便于在没有 GTK 的环境下也能构建视频处理工具）
-option(BUILD_GUI "Build GTK GUI imageprocessor" OFF)
+option(BUILD_GUI "Build GTK GUI imageprocessor" ON)
 
 # 公共 C/C++ 源文件（两端共用）
 set(COMMON_SOURCES
@@ -36,6 +36,13 @@ add_library(image_internal STATIC
     ${SRC_DIR}/kalman.c
 )
 target_include_directories(image_internal PUBLIC ${SRC_DIR})
+
+# 为 C 语言源文件强制包含 <stddef.h> 以解决 size_t 未定义问题
+# 使用生成器表达式以确保跨平台兼容性 (MSVC 使用 /FI, GCC/Clang 使用 -include)
+target_compile_options(image_internal PRIVATE
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:C>>:/FIstddef.h>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:$<$<COMPILE_LANGUAGE:C>:-include stddef.h>>
+)
 
 # ---------------- GUI 目标（可选） ----------------
 if(BUILD_GUI)

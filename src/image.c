@@ -15,6 +15,8 @@ static int kf_firstcorner_loss_count = 0; // 连续丢失帧数计数器
 #define KALMAN_MAX_LOSS_FRAMES 5 // 禁用卡尔曼滤波器的连续丢失帧数阈值
 uint8_t firstcorner_pos[2]={0,0};
 uint8_t firstcorner_pos_filtered[2] = {0, 0}; // 滤波后的位置 [x, y]
+uint8_t secondcorner_pos[2]={0,0};
+uint8_t secondcorner_pos_filtered[2] = {0, 0}; // 滤波后的位置 [x, y]
 // -----------------------------------------
 
 // --- IMO 数组颜色映射说明 ---
@@ -1082,9 +1084,15 @@ void straight_detect(uint8_t *l, uint8_t *r,uint16_t start_l,uint16_t start_r,ui
 	straight = left_straight && right_straight;
 }
 
-//环岛检测函数
+/*
+
+环岛检测函数群
+
+*/
 uint8_t island_flag=0;
 uint8_t first_corner=0;
+uint8_t second_corner=0;
+uint8_t count_down=0;
 //uint8_t firstcorner_pos[2]={0,0};//记录第一个角点位置 行列 写在顶部了
 void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
 {
@@ -1146,6 +1154,7 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	if((left_straight!=0)&&result_cr.matched)
 	{
 		first_corner=1;
+		count_down=8;//见到第一角点就重置计数器
 		firstcorner_pos[0]=points_r[result_cr.start][0];// x
 		firstcorner_pos[1]=image_h-1-points_r[result_cr.start][1];// y
 		// 右环
@@ -1153,12 +1162,15 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	else if((right_straight!=0)&&result_cl.matched)
 	{
 		first_corner=2;
+		count_down=8;//见到第一角点就重置计数器
 	    firstcorner_pos[0]=points_l[result_cl.start][0];// x
 		firstcorner_pos[1]=image_h-1-points_l[result_cl.start][1];// y
 		// 左环
 	}
 	else
 	{
+		if(count_down>0)
+		count_down--;
 		first_corner=0;
 		firstcorner_pos[0]=0;
 		firstcorner_pos[1]=0;
@@ -1166,6 +1178,8 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	log_add_uint8("横firstcorner_pos", firstcorner_pos[0], -1);
 	log_add_uint8("纵firstcorner_pos", firstcorner_pos[1], -1);
 
+
+	/*
     // --- 卡尔曼滤波器集成 ---
     if (first_corner != 0) { // 仅当检测到角点时更新卡尔曼滤波器
         float current_measurement[2] = {(float)firstcorner_pos[0], (float)firstcorner_pos[1]};
@@ -1175,7 +1189,7 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
             // 过程噪声 (Q) 和测量噪声 (R) 是可调参数。
             // dt 暂时设为 1.0，表示一个帧间隔。
             // 如果帧率可变，dt 应动态计算。
-            kalman_init(&kf_firstcorner, current_measurement[0], current_measurement[1], 0.1f, 10.0f);
+            kalman_init(&kf_firstcorner, current_measurement[0], current_measurement[1], 1.0f, 20.0f);//r20
             kf_firstcorner_initialized = 1;
         } else {
             kalman_predict(&kf_firstcorner, 1.0f); // dt = 1.0f (一个帧间隔)
@@ -1210,6 +1224,9 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 
 	log_add_uint8("横firstcorner_pos_filtered", firstcorner_pos_filtered[0], -1);
 	log_add_uint8("纵firstcorner_pos_filtered", firstcorner_pos_filtered[1], -1);
+	*/
+
+	log_add_uint8("count_down", count_down, -1);
     log_add_uint8("result_cl.matched",result_cl.matched,-1);
 	log_add_float("result_cl.confidence",result_cl.confidence,-1);
 	log_add_uint8("result_cr.matched",result_cr.matched,-1);
@@ -1217,6 +1234,13 @@ void firstcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir
 	log_add_uint8("first_corner", first_corner, -1);
 }
 
+
+void secondcorner_detect(uint16_t total_num_l, uint16_t total_num_r,uint16_t *dir_l, uint16_t *dir_r, uint16_t(*points_l)[2], uint16_t(*points_r)[2])
+//第一角点检测逻辑内创建了一个计数器count_down 倒计N帧 第二角点检测函数检测到计数值非零才能进入检测逻辑
+//注意这个倒计时每次见到第一角点都会重置 
+{
+;
+}
 
 
 
