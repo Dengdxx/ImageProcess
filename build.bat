@@ -41,7 +41,7 @@ echo.
 
 REM 3. 编译项目
 echo [3/4] 编译项目...
-cmake --build build --config Release -j 4
+cmake --build build --config Release -j 16
 if errorlevel 1 (
     echo       × 编译失败
     pause
