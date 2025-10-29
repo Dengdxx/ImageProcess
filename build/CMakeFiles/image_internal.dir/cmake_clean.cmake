@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/image_internal.dir/src/kalman.c.obj.d"
   "CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj"
   "CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj.d"
+  "CMakeFiles/image_internal.dir/src/test_ipm.c.obj"
+  "CMakeFiles/image_internal.dir/src/test_ipm.c.obj.d"
   "CMakeFiles/image_internal.dir/src/utils.cpp.obj"
   "CMakeFiles/image_internal.dir/src/utils.cpp.obj.d"
 )

@@ -2832,6 +2832,7 @@ CMakeFiles/imageprocessor.dir/src/processor.c.obj: C:/Users/28693/Desktop/SMARTC
   C:/msys64/mingw64/include/_mingw_secapi.h \
   C:/msys64/mingw64/include/corecrt.h \
   C:/msys64/mingw64/include/crtdefs.h \
+  C:/msys64/mingw64/include/math.h \
   C:/msys64/mingw64/include/sdks/_mingw_ddk.h \
   C:/msys64/mingw64/include/sec_api/string_s.h \
   C:/msys64/mingw64/include/stddef.h \
@@ -2842,7 +2843,9 @@ CMakeFiles/imageprocessor.dir/src/processor.c.obj: C:/Users/28693/Desktop/SMARTC
   C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdint.h \
   C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/global_image_buffer.h \
   C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/image.h \
-  C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.h
+  C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/ipm_matrix.h \
+  C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.h \
+  C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/test_ipm.c
 
 CMakeFiles/imageprocessor.dir/src/utils.cpp.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/utils.cpp \
   C:/msys64/mingw64/include/_bsd_types.h \
@@ -5833,5 +5836,9 @@ C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.h:
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/oscilloscope.cpp:
 
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/processor.c:
+
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/ipm_matrix.h:
+
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/test_ipm.c:
 
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/utils.cpp:

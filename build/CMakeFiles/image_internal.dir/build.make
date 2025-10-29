@@ -161,6 +161,21 @@ CMakeFiles/image_internal.dir/src/kalman.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/image_internal.dir/src/kalman.c.s"
 	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\kalman.c -o CMakeFiles\image_internal.dir\src\kalman.c.s
 
+CMakeFiles/image_internal.dir/src/test_ipm.c.obj: CMakeFiles/image_internal.dir/flags.make
+CMakeFiles/image_internal.dir/src/test_ipm.c.obj: CMakeFiles/image_internal.dir/includes_C.rsp
+CMakeFiles/image_internal.dir/src/test_ipm.c.obj: C:/Users/28693/Desktop/SMARTCAR/ImageProcess/src/test_ipm.c
+CMakeFiles/image_internal.dir/src/test_ipm.c.obj: CMakeFiles/image_internal.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/image_internal.dir/src/test_ipm.c.obj"
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/image_internal.dir/src/test_ipm.c.obj -MF CMakeFiles\image_internal.dir\src\test_ipm.c.obj.d -o CMakeFiles\image_internal.dir\src\test_ipm.c.obj -c C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\test_ipm.c
+
+CMakeFiles/image_internal.dir/src/test_ipm.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/image_internal.dir/src/test_ipm.c.i"
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\test_ipm.c > CMakeFiles\image_internal.dir\src\test_ipm.c.i
+
+CMakeFiles/image_internal.dir/src/test_ipm.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/image_internal.dir/src/test_ipm.c.s"
+	C:\msys64\mingw64\bin\cc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\28693\Desktop\SMARTCAR\ImageProcess\src\test_ipm.c -o CMakeFiles\image_internal.dir\src\test_ipm.c.s
+
 # Object files for target image_internal
 image_internal_OBJECTS = \
 "CMakeFiles/image_internal.dir/src/global_image_buffer.c.obj" \
@@ -168,7 +183,8 @@ image_internal_OBJECTS = \
 "CMakeFiles/image_internal.dir/src/morph_binary_bitpacked.c.obj" \
 "CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj" \
 "CMakeFiles/image_internal.dir/src/utils.cpp.obj" \
-"CMakeFiles/image_internal.dir/src/kalman.c.obj"
+"CMakeFiles/image_internal.dir/src/kalman.c.obj" \
+"CMakeFiles/image_internal.dir/src/test_ipm.c.obj"
 
 # External object files for target image_internal
 image_internal_EXTERNAL_OBJECTS =
@@ -179,9 +195,10 @@ C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CM
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/src/dynamic_log.cpp.obj
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/src/utils.cpp.obj
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/src/kalman.c.obj
+C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/src/test_ipm.c.obj
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/build.make
 C:/Users/28693/Desktop/SMARTCAR/ImageProcess/install/lib/libimage_internal.a: CMakeFiles/image_internal.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\lib\libimage_internal.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\28693\Desktop\SMARTCAR\ImageProcess\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\lib\libimage_internal.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\image_internal.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\image_internal.dir\link.txt --verbose=$(VERBOSE)
 

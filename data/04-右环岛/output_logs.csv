@@ -1,1 +1,1 @@
-left_variance,right_variance,横firstcorner_pos,纵firstcorner_pos,count_down,result_cl.matched,result_cl.confidence,result_cr.matched,result_cr.confidence,first_corner,左直left_straight,右直right_straight,左 中 丢last_left_lost_midstart,右 中 丢last_right_lost_midstart,左 生长dir_l,右 生长dir_r
+left_variance,right_variance,横firstcorner_pos,纵firstcorner_pos,count_down,result_cl.matched,result_cl.confidence,result_cr.matched,result_cr.confidence,first_corner,左直left_straight,右直right_straight,左 中 丢last_left_lost_midstart,右 中 丢last_right_lost_midstart,左 生长dir_l,右 生长dir_r,全图

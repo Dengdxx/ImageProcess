@@ -382,6 +382,30 @@ src/processor.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\video_processor.dir\build.make CMakeFiles/video_processor.dir/src/processor.c.s
 .PHONY : src/processor.c.s
 
+src/test_ipm.obj: src/test_ipm.c.obj
+.PHONY : src/test_ipm.obj
+
+# target to build an object file
+src/test_ipm.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/test_ipm.c.obj
+.PHONY : src/test_ipm.c.obj
+
+src/test_ipm.i: src/test_ipm.c.i
+.PHONY : src/test_ipm.i
+
+# target to preprocess a source file
+src/test_ipm.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/test_ipm.c.i
+.PHONY : src/test_ipm.c.i
+
+src/test_ipm.s: src/test_ipm.c.s
+.PHONY : src/test_ipm.s
+
+# target to generate assembly for a file
+src/test_ipm.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_internal.dir\build.make CMakeFiles/image_internal.dir/src/test_ipm.c.s
+.PHONY : src/test_ipm.c.s
+
 src/utils.obj: src/utils.cpp.obj
 .PHONY : src/utils.obj
 
@@ -474,6 +498,9 @@ help:
 	@echo ... src/processor.obj
 	@echo ... src/processor.i
 	@echo ... src/processor.s
+	@echo ... src/test_ipm.obj
+	@echo ... src/test_ipm.i
+	@echo ... src/test_ipm.s
 	@echo ... src/utils.obj
 	@echo ... src/utils.i
 	@echo ... src/utils.s

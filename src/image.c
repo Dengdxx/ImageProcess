@@ -1255,6 +1255,10 @@ void userlog()
 	//log_add_uint8_array("右 丢right_lost", right_lost, image_h,-1);
 	//log_add_uint8_array("左边 最终l_border", l_border, image_h,-1);
 	//log_add_uint8_array("右边 最终r_border", r_border, image_h,-1);
+	log_add_uint8("pdl",l_border[29],-1);
+	log_add_uint8("pdr",r_border[29],-1);
+	log_add_uint8("pul",l_border[79],-1);
+	log_add_uint8("pur",r_border[79],-1);
 	log_add_uint8("左直left_straight", left_straight, -1);
 	log_add_uint8("右直right_straight", right_straight, -1);
 	//log_add_uint8("环 1右2左island_flag", island_flag, -1);

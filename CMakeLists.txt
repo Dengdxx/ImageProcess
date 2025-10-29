@@ -34,6 +34,7 @@ add_library(image_internal STATIC
     ${SRC_DIR}/dynamic_log.cpp
     ${SRC_DIR}/utils.cpp
     ${SRC_DIR}/kalman.c
+    ${SRC_DIR}/test_ipm.c
 )
 target_include_directories(image_internal PUBLIC ${SRC_DIR})
 

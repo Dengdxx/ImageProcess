@@ -17,6 +17,9 @@
 #endif
 #endif
 
+#include "test_ipm.c"
+
+
 // 默认实现：按契约 original 已是 0/255；默认直接拷贝到 imo。
 // 可选：定义 SANITIZE_INPUT 时，对非 0/255 的输入做阈值归一化。
 void process_original_to_imo(const uint8_t * RESTRICT original,
@@ -25,11 +28,9 @@ void process_original_to_imo(const uint8_t * RESTRICT original,
                              int height) {
     if (width <= 0 || height <= 0) return;
 
-    // 将输入 original 拷贝到全局 Grayscale（image_process 使用该缓冲作为输入）
-    for (int y = 0; y < height; ++y) {
-        memcpy(Grayscale[y], original + y * width, (size_t)width);
-    }
 
+    fast_ipm_transform((uint8_t*)original, (uint8_t*)Grayscale);
+generate_ipm_lut_in_ram();
     // 调用你的流水线
     image_process();
 
