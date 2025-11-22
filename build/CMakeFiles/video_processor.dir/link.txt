@@ -1,3 +1,3 @@
 "C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\video_processor.dir/objects.a
 C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\video_processor.dir/objects.a @CMakeFiles\video_processor.dir\objects1.rsp
-C:\msys64\mingw64\bin\c++.exe -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\video_processor.dir/objects.a -Wl,--no-whole-archive -o C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\bin\video_processor.exe -Wl,--out-implib,C:\Users\28693\Desktop\SMARTCAR\ImageProcess\install\lib\libvideo_processor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\video_processor.dir\linkLibs.rsp
+C:\msys64\mingw64\bin\c++.exe -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\video_processor.dir/objects.a -Wl,--no-whole-archive -o D:\DX\SMARTCAR\ImageProcess\install\bin\video_processor.exe -Wl,--out-implib,D:\DX\SMARTCAR\ImageProcess\install\lib\libvideo_processor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\video_processor.dir\linkLibs.rsp
